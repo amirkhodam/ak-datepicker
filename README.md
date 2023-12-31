@@ -19,10 +19,6 @@ or
 yarn add tailwindcss@^3.4
 ```
 
-## Customize configuration
-
-See [Vite Configuration Reference](https://vitejs.dev/config/).
-
 ## Usage
 
 ### 1. Install the DatePicker Component
