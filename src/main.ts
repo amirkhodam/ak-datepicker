@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import './assets/DatePickerConf'
+import './assets/style.css'
 
 import App from './App.vue'
 
