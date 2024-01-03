@@ -111,8 +111,8 @@ function getDay(week: number, dayIndex: number): string {
     day -= 1
   } // Minus 1 because week starts from saturday in jalali
   return day > 0 &&
-    day <=
-      getDays(props.dateType, parseInt(selectedDate.value.year), parseInt(selectedDate.value.month))
+  day <=
+  getDays(props.dateType, parseInt(selectedDate.value.year), parseInt(selectedDate.value.month))
     ? day.toString()
     : ''
 }
@@ -180,17 +180,17 @@ function dateInRangeChecker(day: string): boolean {
 </script>
 
 <template>
-  <main class="border-3 flex flex-col gap-0.5">
+  <main class="ak-border-3 ak-flex ak-flex-col ak-gap-0.5">
     <div
-      class="mx-auto mb-3 flex max-w-min flex-row gap-0.5 rounded bg-[--select-trigger-bg] bg-opacity-[0.2] p-1"
+      class="ak-mx-auto ak-mb-3 ak-flex ak-max-w-min ak-flex-row ak-gap-0.5 ak-rounded ak-bg-[--select-trigger-bg] ak-p-1"
     >
       <button
         v-for="(status, key, index) in translation[dateType].status"
         :class="{
-          'bg-[var(--primary-color)]': selectTrigger == key.toString(),
-          'py-0.5': true,
-          'px-1': true,
-          rounded: true
+          'ak-bg-[var(--primary-color)]': selectTrigger == key.toString(),
+          'ak-py-0.5': true,
+          'ak-px-1': true,
+          'ak-rounded': true
         }"
         :key="`statusTrigger-${index}`"
         @click="selectTrigger = key"
@@ -198,19 +198,19 @@ function dateInRangeChecker(day: string): boolean {
         {{ status.charAt(0).toUpperCase() + status.slice(1) }}
       </button>
     </div>
-    <div class="mx-auto flex min-w-min flex-row gap-0.5">
-      <span class="text-base font-normal text-[--main-color]">
+    <div class="ak-mx-auto ak-flex ak-min-w-min ak-flex-row ak-gap-0.5">
+      <span class="ak-text-base ak-font-normal ak-text-[--main-color]">
         {{ selectedDate.year }}
         {{ translation[props.dateType].months[parseInt(selectedDate.month) - 1] }}
       </span>
     </div>
     <div>
       <div name="selectionBox" id="selectionBox">
-        <div class="h-60 w-60" name="years" id="selectionYear" v-if="selectTrigger === 'year'">
-          <div name="yearNav" class="flex h-6 flex-row justify-between">
+        <div class="ak-h-60 ak-w-60" name="years" id="selectionYear" v-if="selectTrigger === 'year'">
+          <div name="yearNav" class="ak-flex ak-h-6 ak-flex-row ak-justify-between">
             <button
               :class="{
-                'cursor-default opacity-50': !(dateCurrentPage > 0)
+                'ak-cursor-default ak-opacity-50': !(dateCurrentPage > 0)
               }"
               @click="
                 () => {
@@ -224,7 +224,7 @@ function dateInRangeChecker(day: string): boolean {
             </button>
             <button
               :class="{
-                'cursor-default opacity-50': !(dateCurrentPage < yearRange.pages - 1)
+                'ak-cursor-default ak-opacity-50': !(dateCurrentPage < yearRange.pages - 1)
               }"
               @click="
                 () => {
@@ -237,10 +237,13 @@ function dateInRangeChecker(day: string): boolean {
               &gt;
             </button>
           </div>
-          <table class="h-full w-full overflow-hidden p-1" name="years">
+          <table class="ak-h-full ak-w-full ak-overflow-hidden ak-p-1" name="years">
             <tr v-for="duration in 4" :key="`duration-${duration}`">
               <td
-                class="cursor-pointer text-center hover:bg-[--hover-color]"
+                :class="{
+                'ak-text-center': true,
+                 'ak-cursor-pointer hover:ak-bg-[--hover-color]' : getYear(duration, year) != ''
+              }"
                 v-for="year in 5"
                 :key="`year-${year}`"
                 @click="setYear(duration, year)"
@@ -250,15 +253,15 @@ function dateInRangeChecker(day: string): boolean {
             </tr>
           </table>
         </div>
-        <div class="h-60 w-60" name="months" v-else-if="selectTrigger === 'month'">
-          <div class="flex h-6"></div>
-          <table class="h-full w-full">
+        <div class="ak-h-60 ak-w-60" name="months" v-else-if="selectTrigger === 'month'">
+          <div class="ak-flex ak-h-6"></div>
+          <table class="ak-h-full ak-w-full">
             <tr v-for="season in 4" :key="`season-${season}`">
               <td
                 :class="{
-                  'text-center': true,
-                  'opacity-50': !monthInRangeChecker(((season - 1) * 3 + month).toString()),
-                  'cursor-pointer hover:bg-[--hover-color]': monthInRangeChecker(
+                  'ak-text-center': true,
+                  'ak-opacity-50': !monthInRangeChecker(((season - 1) * 3 + month).toString()),
+                  'ak-cursor-pointer hover:ak-bg-[--hover-color]': monthInRangeChecker(
                     ((season - 1) * 3 + month).toString()
                   )
                 }"
@@ -271,34 +274,34 @@ function dateInRangeChecker(day: string): boolean {
             </tr>
           </table>
         </div>
-        <div class="h-60 w-60" name="days" v-else-if="selectTrigger === 'date'">
-          <div class="flex h-6"></div>
-          <table class="h-full w-full">
+        <div class="ak-h-60 ak-w-60" name="days" v-else-if="selectTrigger === 'date'">
+          <div class="ak-flex ak-h-6"></div>
+          <table class="ak-h-full ak-w-full">
             <thead>
-              <tr class="h-3 pb-1">
-                <td
-                  v-for="weekDay in translation[dateType].days"
-                  :key="`weekDay-${weekDay}`"
-                  class="pb-1 text-center text-sm font-light"
-                >
-                  {{ dateType == 'gregorian' ? weekDay.substring(0, 3) : weekDay[0] }}
-                </td>
-              </tr>
+            <tr class="ak-h-3 ak-pb-1">
+              <td
+                v-for="weekDay in translation[dateType].days"
+                :key="`weekDay-${weekDay}`"
+                class="ak-pb-1 ak-text-center ak-text-sm ak-font-light"
+              >
+                {{ dateType == 'gregorian' ? weekDay.substring(0, 3) : weekDay[0] }}
+              </td>
+            </tr>
             </thead>
             <tr v-for="week in 6" :key="`week-${week}`">
               <td
                 v-for="day in 7"
                 :key="`day-${day}`"
                 :class="{
-                  'text-center': true,
-                  'flex-inline h-8 w-8 items-center justify-center': true,
-                  'bg-[--primary-color]': selectedDayChecker(getDay(week, day)),
-                  'translate bg-[--in-range-date-bg] bg-opacity-[0.7]': SelectedDateInRangeChecker(
+                  'ak-text-center': true,
+                  'ak-flex-inline ak-h-8 ak-w-8 ak-items-center ak-justify-center': true,
+                  'ak-bg-[--primary-color]': selectedDayChecker(getDay(week, day)),
+                  'ak-translate ak-bg-[--in-range-date-bg] ak-bg-opacity-[0.7]': SelectedDateInRangeChecker(
                     getDay(week, day)
                   ),
-                  'cursor-pointer hover:bg-[--hover-color]':
+                  'ak-cursor-pointer hover:ak-bg-[--hover-color]':
                     getDay(week, day) != '' && dateInRangeChecker(getDay(week, day).toString()),
-                  'opacity-50': !dateInRangeChecker(getDay(week, day).toString())
+                  'ak-opacity-50': !dateInRangeChecker(getDay(week, day).toString())
                 }"
                 @click="setDate(getDay(week, day).toString())"
               >
