@@ -1,16 +1,14 @@
 {
   "name": "ak-datepicker",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "type": "module",
   "files": [
     "dist"
   ],
   "main": "./dist/ak-datepicker.umd.cjs",
   "module": "./dist/ak-datepicker.js",
+  "style": "dist/style.css",
   "unpkg": "dist/ak-datepicker.min.js",
-  "browser": {
-    "./sfc": "src/ak-datepicker.vue"
-  },
   "exports": {
     ".": {
       "import": "./dist/ak-datepicker.js",
