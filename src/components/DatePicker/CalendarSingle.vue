@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 // Import requirements
 import { computed, onMounted, ref } from 'vue'
-import type { Ref } from 'vue'
+import type { Ref, ComputedRef } from 'vue'
 import type {
   DateInterface,
   SinglePickerInterface,
@@ -19,6 +19,12 @@ import {
 
 // Props from parent component
 const props = defineProps<SinglePickerInterface>()
+/**
+ *  Emits: Only for date changes
+ *  ```ts
+ *    emit('update:date', dateString.value)
+ *  ```
+ */
 const emit = defineEmits(['update:date'])
 
 // Initialize local properties
@@ -28,7 +34,7 @@ const translation = ref(
     { months: string[]; days: string[]; status: Record<TriggerInterface, string> }
   >
 )
-const selectTrigger: Ref<TriggerInterface> = ref('date')
+const selectionTrigger: Ref<TriggerInterface> = ref('date')
 const selectedDate: Ref<DateInterface> = ref({
   year: props.date.split('-')[0] || getNewYear(props.dateType).toString() || '',
   month:
@@ -43,18 +49,40 @@ const selectedDate: Ref<DateInterface> = ref({
 const dateCurrentPage: Ref<number> = ref(0)
 
 // Computed properties
-const dateString = computed((): string => {
+
+/**
+ * @type ComputedRef<string>
+ * @example
+ * 1990-01-01
+ * @returns full date in `yyyy-MM-dd`
+ */
+const dateString: ComputedRef<string> = computed((): string => {
   const strDate: string = Object.values(selectedDate.value).join('-')
   return strDate.length == 10 ? strDate : ''
 })
 
-const firstDayOfMonth = computed((): number => {
+/**
+ * @type ComputedRef<number>
+ * @example
+ * 5 (It means Friday=sixth day)
+ * @returns Index of first week day of selected month 0-7
+ */
+const firstDayOfMonth: ComputedRef<number> = computed((): number => {
   const monthIndex: number = parseInt(selectedDate.value.month) || getNewMonth(props.dateType)
   const yearIndex: number = parseInt(selectedDate.value.year) || getNewYear(props.dateType)
   return getNewDayInMonth(props.dateType, yearIndex, monthIndex, 1)
 })
 
-const yearRange = computed((): YearInterface => {
+/**
+ * @type ComputedRef<YearInterface>
+ * @example
+ * {
+ *   range: [2003, 2043]
+ *   pages: 2 // 20 years per page
+ * }
+ * @returns Limitation of selectable year range and number of page
+ */
+const yearRange: ComputedRef<YearInterface> = computed((): YearInterface => {
   const range = ref([] as number[])
   if (props.maxDate && props.minDate) {
     range.value = [parseInt(props.minDate.year), parseInt(props.maxDate.year)]
@@ -67,14 +95,34 @@ const yearRange = computed((): YearInterface => {
   }
 })
 
+/**
+ * @type ComputedRef<boolean>
+ * @example
+ * {
+ *   range: [2003, 2043]
+ *   pages: 2 // 20 years per page
+ * }
+ * @returns Limitation of selectable year range and number of page
+ */
+const selectedDay: ComputedRef<number> = computed((): number => {
+  return parseInt(selectedDate.value.day)
+})
+
 // Mounted hook
 onMounted(() => {
   const dateCheck: boolean =
-    selectedDate.value.year != '' && selectedDate.value.month != '' && selectedDate.value.day != ''
-  selectTrigger.value = dateCheck ? 'date' : 'year'
+    selectedDate.value.year != '' && selectedDate.value.month != '' && selectedDate.value.day != '' // Check initialized default date value
+  selectionTrigger.value = dateCheck ? 'date' : 'year' // Change selectionTrigger 'date' if date initialized and 'year' if not
 })
 
 // Methods
+/**
+ * Mutate selectedDate['date'] and call update:date emit
+ * @param day
+ * @type void
+ * @example
+ * setDate('10')
+ */
 function setDate(day: string): void {
   if (day != '' && dateInRangeChecker(day)) {
     selectedDate.value.day = addZero(day.toString())
@@ -82,29 +130,82 @@ function setDate(day: string): void {
   }
 }
 
+/**
+ * Mutate selectedDate['year']. It gets row and col of years in table and get right year from
+ * getYear() then declare year in selectedDate
+ * @param duration
+ * @param year
+ * @type void
+ * @example
+ * setYear(1, 5)
+ */
 function setYear(duration: number, year: number): void {
   selectedDate.value.year = getYear(duration, year).toString()
-  selectTrigger.value = 'month'
+  selectionTrigger.value = 'month'
 }
 
+
+/**
+ * Mutate selectedDate['month']. It gets row and col of month in table and declare month in selectedDate
+ * @type void
+ * @example
+ * setMonth(1, 2)
+ * @param season
+ * @param month
+ */
 function setMonth(season: number, month: number): void {
   const monthSelected: number = (season - 1) * 3 + month
   if (monthInRangeChecker(monthSelected.toString())) {
     selectedDate.value.month = addZero(((season - 1) * 3 + month).toString())
-    selectTrigger.value = 'date'
+    selectionTrigger.value = 'date'
   }
 }
 
+/**
+ * Add 0 in start of date and month lower then 10
+ * @type string
+ * @example
+ * ```ts
+ * const month: string = addZero('2')
+ * console.log(month) // "02"
+ * ```
+ * @param num
+ */
 function addZero(num: string): string {
   return parseInt(num) < 10 ? `0${num}` : num
 }
 
+
+/**
+ * Gets duration and year from table of years and returns right year
+ * @type string
+ * @example
+ * ```ts
+ * setMonth(1, 2)
+ * ```
+ * @param duration
+ * @param yearIndex
+ */
 function getYear(duration: number, yearIndex: number): string {
   const year =
     yearRange.value.range[0] + (duration - 1) * 5 + yearIndex - 1 + dateCurrentPage.value * 20
   return year <= yearRange.value.range[1] ? year.toString() : ''
 }
 
+/**
+ * Gets week and day index from date table and returns right date.
+ * If that index be out of month, function returns null string ('')
+ * @example
+ * Selected month in the selected year starts from Tuesday and finish in Thursday. So, Sunday and Monday in first week and
+ * Friday and Saturday will be null string.
+ * @type string
+ * @example
+ * ```ts
+ * getDay(1, 2) // Means first week and second index of this week
+ * ```
+ * @param week
+ * @param dayIndex
+ */
 function getDay(week: number, dayIndex: number): string {
   let day = (week - 1) * 7 + dayIndex - firstDayOfMonth.value
   if (props.dateType == 'jalali') {
@@ -117,16 +218,24 @@ function getDay(week: number, dayIndex: number): string {
     : ''
 }
 
+/**
+ * This function check if the month is in the min and max range or not and returns "true" or "false"
+ * @type boolean
+ * @example
+ * ```ts
+ * monthInRangeChecker(1)
+ * ```
+ * @param month
+ */
 function monthInRangeChecker(month: string): boolean {
-  if (
-    parseInt(selectedDate.value.year) < yearRange.value.range[1] &&
-    parseInt(selectedDate.value.year) > yearRange.value.range[0]
-  ) {
+  const selectedYear: number = parseInt(selectedDate.value.year)
+  const { range } = yearRange.value
+  if (selectedYear < range[1] && selectedYear > range[0]) {
     return true
-  } else if (parseInt(selectedDate.value.year) == yearRange.value.range[1]) {
+  } else if (selectedYear == range[1]) {
     const maxMonth = props.maxDate ? parseInt(props.maxDate.month) : getNewMonth(props.dateType) - 1
     return parseInt(month) <= maxMonth
-  } else if (parseInt(selectedDate.value.year) == yearRange.value.range[0]) {
+  } else if (selectedYear == range[0]) {
     const minMonth = props.minDate ? parseInt(props.minDate.month) : getNewMonth(props.dateType) - 1
     return parseInt(month) >= minMonth
   } else {
@@ -134,48 +243,56 @@ function monthInRangeChecker(month: string): boolean {
   }
 }
 
-function selectedDayChecker(day: string): boolean {
-  if (day) {
-    return parseInt(day) == parseInt(selectedDate.value.day)
+/**
+ * This function check if the day is in the selected date range or not and returns "true" or "false"
+ * @type boolean
+ * @example
+ * ```ts
+ * SelectedDateInRangeChecker(1)
+ * ```
+ * @param day
+ */
+function SelectedDateInRangeChecker(day: string): boolean {
+  if (props.isStartDatePicker && day != '' && selectedDate.value.day != '') {
+    return parseInt(day) > parseInt(selectedDate.value.day)
+  } else if (day != '') {
+    return parseInt(day) < parseInt(selectedDate.value.day)
   } else {
     return false
   }
 }
 
-function SelectedDateInRangeChecker(curDay: string): boolean {
-  if (props.isStartDatePicker && curDay != '' && selectedDate.value.day != '') {
-    return parseInt(curDay) > parseInt(selectedDate.value.day)
-  } else if (curDay != '') {
-    return parseInt(curDay) < parseInt(selectedDate.value.day)
-  } else {
-    return false
-  }
-}
-
+/**
+ * This function check if the day is in the min and max date range or not and returns "true" or "false"
+ * @type boolean
+ * @example
+ * ```ts
+ * dateInRangeChecker('02')
+ * ```
+ * @param day
+ */
 function dateInRangeChecker(day: string): boolean {
-  if (monthInRangeChecker(selectedDate.value.month)) {
-    if (parseInt(selectedDate.value.year) == yearRange.value.range[1]) {
-      const maxMonth = props.maxDate ? parseInt(props.maxDate.month) : 12
-      const selectedMonth = selectedDate.value.month
-      const maxDay = props.maxDate ? props.maxDate.day : '31'
-      return (
-        parseInt(selectedMonth) < maxMonth ||
-        (parseInt(selectedMonth) == maxMonth && parseInt(day) <= parseInt(maxDay))
-      )
-    } else if (parseInt(selectedDate.value.year) == yearRange.value.range[0]) {
-      const minMonth = props.minDate ? parseInt(props.minDate.month) : getNewMonth(props.dateType)
-      const selectedMonth = selectedDate.value.month
-      const maxDay = props.minDate ? props.minDate.day : '1'
-      return (
-        parseInt(selectedMonth) > minMonth ||
-        (parseInt(selectedMonth) == minMonth && parseInt(day) >= parseInt(maxDay))
-      )
-    } else {
-      return true
-    }
-  } else {
+  if (!monthInRangeChecker(selectedDate.value.month)) {
     return false
   }
+
+  const selectedYear = parseInt(selectedDate.value.year)
+  const { range } = yearRange.value
+  if (selectedYear === range[1]) {
+    const maxMonth = props.maxDate ? parseInt(props.maxDate.month) : 12
+    const selectedMonth = parseInt(selectedDate.value.month)
+    const maxDay = props.maxDate ? parseInt(props.maxDate.day) : 31
+    return selectedMonth < maxMonth || (selectedMonth === maxMonth && parseInt(day) <= maxDay)
+  }
+
+  if (selectedYear === range[0]) {
+    const minMonth = props.minDate ? parseInt(props.minDate.month) : getNewMonth(props.dateType)
+    const selectedMonth = parseInt(selectedDate.value.month)
+    const minDay = props.minDate ? parseInt(props.minDate.day) : 1
+    return selectedMonth > minMonth || (selectedMonth === minMonth && parseInt(day) >= minDay)
+  }
+
+  return false
 }
 </script>
 
@@ -187,13 +304,13 @@ function dateInRangeChecker(day: string): boolean {
       <button
         v-for="(status, key, index) in translation[dateType].status"
         :class="{
-          'ak-bg-[var(--primary-color)]': selectTrigger == key.toString(),
+          'ak-bg-[var(--primary-color)]': selectionTrigger == key.toString(),
           'ak-py-0.5': true,
           'ak-px-1': true,
           'ak-rounded': true
         }"
         :key="`statusTrigger-${index}`"
-        @click="selectTrigger = key"
+        @click="selectionTrigger = key"
       >
         {{ status.charAt(0).toUpperCase() + status.slice(1) }}
       </button>
@@ -206,7 +323,7 @@ function dateInRangeChecker(day: string): boolean {
     </div>
     <div>
       <div name="selectionBox" id="selectionBox">
-        <div class="ak-h-60 ak-w-60" name="years" id="selectionYear" v-if="selectTrigger === 'year'">
+        <div class="ak-h-60 ak-w-60" name="years" id="selectionYear" v-if="selectionTrigger === 'year'">
           <div name="yearNav" class="ak-flex ak-h-6 ak-flex-row ak-justify-between">
             <button
               :class="{
@@ -253,7 +370,7 @@ function dateInRangeChecker(day: string): boolean {
             </tr>
           </table>
         </div>
-        <div class="ak-h-60 ak-w-60" name="months" v-else-if="selectTrigger === 'month'">
+        <div class="ak-h-60 ak-w-60" name="months" v-else-if="selectionTrigger === 'month'">
           <div class="ak-flex ak-h-6"></div>
           <table class="ak-h-full ak-w-full">
             <tr v-for="season in 4" :key="`season-${season}`">
@@ -274,7 +391,7 @@ function dateInRangeChecker(day: string): boolean {
             </tr>
           </table>
         </div>
-        <div class="ak-h-60 ak-w-60" name="days" v-else-if="selectTrigger === 'date'">
+        <div class="ak-h-60 ak-w-60" name="days" v-else-if="selectionTrigger === 'date'">
           <div class="ak-flex ak-h-6"></div>
           <table class="ak-h-full ak-w-full">
             <thead>
@@ -295,7 +412,7 @@ function dateInRangeChecker(day: string): boolean {
                 :class="{
                   'ak-text-center': true,
                   'ak-flex-inline ak-h-8 ak-w-8 ak-items-center ak-justify-center': true,
-                  'ak-bg-[--primary-color]': selectedDayChecker(getDay(week, day)),
+                  'ak-bg-[--primary-color]': selectedDay == parseInt(getDay(week, day)),
                   'ak-translate ak-bg-[--in-range-date-bg] ak-bg-opacity-[0.7]': SelectedDateInRangeChecker(
                     getDay(week, day)
                   ),
