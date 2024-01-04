@@ -292,7 +292,7 @@ function dateInRangeChecker(day: string): boolean {
     return selectedMonth > minMonth || (selectedMonth === minMonth && parseInt(day) >= minDay)
   }
 
-  return false
+  return true
 }
 </script>
 
