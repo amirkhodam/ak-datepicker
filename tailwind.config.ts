@@ -2,6 +2,7 @@ import theme = require('tailwindcss/defaultTheme')
 
 /** @type {import('tailwindcss').Config} */
 export default {
+  prefix: 'ak-',
   content: ['./src/**/*.{html,js,vue,ts}'],
   theme: {
     screens: {
@@ -23,5 +24,13 @@ export default {
     },
     extend: {}
   },
-  plugins: []
+  plugins: [
+    function({ addVariant, e }) {
+      addVariant('ak_datepicker', ({ modifySelectors, separator }) => {
+        modifySelectors(({ className }) => {
+          return `.${e(`ak_datepicker${separator}${className}`)} [data-ak-datepicker]`
+        })
+      })
+    }
+  ]
 }

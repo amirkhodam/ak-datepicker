@@ -8,7 +8,6 @@ import type {
   DatePickerInterface,
   DateRangePickerInterface
 } from './interfaces'
-
 // Props from parent component
 const props = defineProps<DatePickerInterface>()
 const emit = defineEmits(['update:value'])
@@ -109,19 +108,22 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="relative h-full w-full">
+  <main
+    class="ak_datepicker ak-h-full ak-w-full">
+    <div class="ak-relative ak-h-full ak-w-full">
+    </div>
     <input type="text" v-model="dateString" @focus="isShowDate = true" />
     <br />
     <br />
     <div
       v-if="isShowDate"
-      class="absolute max-h-min min-h-112 min-w-6 max-w-min rounded-lg bg-[var(--bg-main)] p-6 text-white"
+      class="ak-absolute ak-max-h-min ak-min-h-112 ak-min-w-6 ak-max-w-min ak-rounded-lg ak-bg-[var(--bg-main)] ak-p-6 ak-text-white"
     >
-      <p class="mx-auto block h-3 max-w-max font-semibold text-[color:var(--main-color)]">
+      <p class="ak-mx-auto ak-block ak-h-3 ak-max-w-max ak-font-semibold ak-text-[color:var(--main-color)]">
         {{ selectedDateFirst }} _ {{ selectedDateSecond }}
       </p>
       <br />
-      <div class="flex flex-row gap-1">
+      <div class="ak-flex ak-flex-row ak-gap-1">
         <DatePickerSingle
           name="startDate"
           v-model:date="selectedDateFirst"
@@ -144,3 +146,7 @@ onMounted(() => {
     </div>
   </main>
 </template>
+
+<style lang="scss">
+@import "../assets/scss/style";
+</style>

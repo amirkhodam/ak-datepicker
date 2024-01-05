@@ -1,0 +1,22 @@
+:root {
+  --bg-main: #0e141a;
+  --main-color: #70d1f2;
+  --primary-color: #005297;
+  --select-trigger-bg-opacity: 0.2;
+  --select-trigger-bg: rgb(75 85 99 / var(--select-trigger-bg-opacity));
+  --hover-color: #4b5563;
+  --in-range-date-bg: #0A273F
+}
+
+.ak_datepicker {
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-feature-settings: normal;
+  font-variation-settings: normal;
+  -webkit-tap-highlight-color: transparent;
+@import "output";
+}
