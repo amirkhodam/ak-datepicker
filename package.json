@@ -2,9 +2,30 @@
   "name": "ak-datepicker",
   "version": "1.0.0",
   "type": "module",
-
   "files": [
     "dist"
+  ],
+  "keywords": [
+    "vue",
+    "vue3",
+    "date-picker",
+    "calendar",
+    "jalali",
+    "gregorian",
+    "web-component",
+    "frontend",
+    "tailwindcss",
+    "customizable",
+    "npm-package",
+    "open-source",
+    "developer-tools",
+    "date-range",
+    "component-library",
+    "user-interface",
+    "responsive",
+    "accessibility",
+    "localization",
+    "web-development"
   ],
   "main": "./dist/ak-datepicker.umd.cjs",
   "module": "./dist/ak-datepicker.js",
