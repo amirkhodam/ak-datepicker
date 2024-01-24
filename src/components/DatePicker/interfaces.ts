@@ -8,9 +8,11 @@ export type DateType = 'jalali' | 'gregorian'
 /**
  * ```ts
  *  {
- *    dateType: DateType,
- *    minDate: string,
+ *    dateType: DateType
+ *    range: boolean
+ *    minDate: string
  *    maxDate: string
+ *    format: string
  *  }
  *  ```
  **/
@@ -109,11 +111,13 @@ export interface DatePickerInterface {
  *  ```
  **/
 export interface SinglePickerInterface {
-  date: string
-  minDate?: DateInterface
-  maxDate?: DateInterface
+  date: DateInterface
+  minDate: DateInterface
+  maxDate: DateInterface
   dateType: DateType
   isStartDatePicker: boolean
+  format: string
+  range: boolean
 }
 
 // Method props

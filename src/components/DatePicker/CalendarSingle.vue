@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 // Import requirements
-import { computed, onMounted, ref } from 'vue'
-import type { Ref, ComputedRef } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
+import type { Ref, ComputedRef, UnwrapNestedRefs } from 'vue'
 import type {
   DateInterface,
   SinglePickerInterface,
@@ -10,7 +10,6 @@ import type {
 } from './interfaces'
 import Translation from './translation.json'
 import {
-  getNewDate,
   getNewDayInMonth,
   getNewMonth,
   getNewYear,
@@ -25,7 +24,7 @@ const props = defineProps<SinglePickerInterface>()
  *    emit('update:date', dateString.value)
  *  ```
  */
-const emit = defineEmits(['update:date'])
+const emit = defineEmits(['update:date', 'close'])
 
 // Initialize local properties
 const translation = ref(
@@ -35,32 +34,11 @@ const translation = ref(
   >
 )
 const selectionTrigger: Ref<TriggerInterface> = ref('date')
-const selectedDate: Ref<DateInterface> = ref({
-  year: props.date.split('-')[0] || getNewYear(props.dateType).toString() || '',
-  month:
-    props.date.split('-')[1] ||
-    (props.isStartDatePicker
-      ? addZero(getNewMonth(props.dateType).toString())
-      : addZero((getNewMonth(props.dateType) + 1).toString())) ||
-    '',
-  day: props.date.split('-')[2] || ''
-})
+const selectedDate: UnwrapNestedRefs<DateInterface> = reactive(props.date)
 
 const dateCurrentPage: Ref<number> = ref(0)
 
 // Computed properties
-
-/**
- * @type ComputedRef<string>
- * @example
- * 1990-01-01
- * @returns full date in `yyyy-MM-dd`
- */
-const dateString: ComputedRef<string> = computed((): string => {
-  const strDate: string = Object.values(selectedDate.value).join('-')
-  return strDate.length == 10 ? strDate : ''
-})
-
 /**
  * @type ComputedRef<number>
  * @example
@@ -68,9 +46,9 @@ const dateString: ComputedRef<string> = computed((): string => {
  * @returns Index of first week day of selected month 0-7
  */
 const firstDayOfMonth: ComputedRef<number> = computed((): number => {
-  const monthIndex: number = parseInt(selectedDate.value.month) || getNewMonth(props.dateType)
-  const yearIndex: number = parseInt(selectedDate.value.year) || getNewYear(props.dateType)
-  return getNewDayInMonth(props.dateType, yearIndex, monthIndex, 1)
+  const monthIndex: number = parseInt(selectedDate.month) || getNewMonth(props.dateType)
+  const yearIndex: number = parseInt(selectedDate.year) || getNewYear(props.dateType)
+  return getNewDayInMonth(props.dateType, yearIndex, monthIndex)
 })
 
 /**
@@ -105,13 +83,13 @@ const yearRange: ComputedRef<YearInterface> = computed((): YearInterface => {
  * @returns Limitation of selectable year range and number of page
  */
 const selectedDay: ComputedRef<number> = computed((): number => {
-  return parseInt(selectedDate.value.day)
+  return parseInt(selectedDate.day)
 })
 
 // Mounted hook
 onMounted(() => {
   const dateCheck: boolean =
-    selectedDate.value.year != '' && selectedDate.value.month != '' && selectedDate.value.day != '' // Check initialized default date value
+    selectedDate.year != '' && selectedDate.month != '' && selectedDate.day != '' // Check initialized default date value
   selectionTrigger.value = dateCheck ? 'date' : 'year' // Change selectionTrigger 'date' if date initialized and 'year' if not
 })
 
@@ -125,8 +103,9 @@ onMounted(() => {
  */
 function setDate(day: string): void {
   if (day != '' && dateInRangeChecker(day)) {
-    selectedDate.value.day = addZero(day.toString())
-    emit('update:date', dateString.value)
+    selectedDate.day = addZero(day.toString())
+    emit('update:date', selectedDate)
+    emit('close')
   }
 }
 
@@ -140,7 +119,7 @@ function setDate(day: string): void {
  * setYear(1, 5)
  */
 function setYear(duration: number, year: number): void {
-  selectedDate.value.year = getYear(duration, year).toString()
+  selectedDate.year = getYear(duration, year).toString()
   selectionTrigger.value = 'month'
 }
 
@@ -156,7 +135,7 @@ function setYear(duration: number, year: number): void {
 function setMonth(season: number, month: number): void {
   const monthSelected: number = (season - 1) * 3 + month
   if (monthInRangeChecker(monthSelected.toString())) {
-    selectedDate.value.month = addZero(((season - 1) * 3 + month).toString())
+    selectedDate.month = addZero(((season - 1) * 3 + month).toString())
     selectionTrigger.value = 'date'
   }
 }
@@ -213,7 +192,7 @@ function getDay(week: number, dayIndex: number): string {
   } // Minus 1 because week starts from saturday in jalali
   return day > 0 &&
   day <=
-  getDays(props.dateType, parseInt(selectedDate.value.year), parseInt(selectedDate.value.month))
+  getDays(props.dateType, parseInt(selectedDate.year), parseInt(selectedDate.month))
     ? day.toString()
     : ''
 }
@@ -228,7 +207,7 @@ function getDay(week: number, dayIndex: number): string {
  * @param month
  */
 function monthInRangeChecker(month: string): boolean {
-  const selectedYear: number = parseInt(selectedDate.value.year)
+  const selectedYear: number = parseInt(selectedDate.year)
   const { range } = yearRange.value
   if (selectedYear < range[1] && selectedYear > range[0]) {
     return true
@@ -253,10 +232,10 @@ function monthInRangeChecker(month: string): boolean {
  * @param day
  */
 function SelectedDateInRangeChecker(day: string): boolean {
-  if (props.isStartDatePicker && day != '' && selectedDate.value.day != '') {
-    return parseInt(day) > parseInt(selectedDate.value.day)
-  } else if (day != '') {
-    return parseInt(day) < parseInt(selectedDate.value.day)
+  if (props.isStartDatePicker && day != '' && selectedDate.day != '' && props.range) {
+    return parseInt(day) > parseInt(selectedDate.day)
+  } else if (day != '' && props.range) {
+    return parseInt(day) < parseInt(selectedDate.day)
   } else {
     return false
   }
@@ -272,27 +251,27 @@ function SelectedDateInRangeChecker(day: string): boolean {
  * @param day
  */
 function dateInRangeChecker(day: string): boolean {
-  if (!monthInRangeChecker(selectedDate.value.month)) {
+  if (!monthInRangeChecker(selectedDate.month)) {
     return false
   }
 
-  const selectedYear = parseInt(selectedDate.value.year)
+  const selectedYear = parseInt(selectedDate.year)
   const { range } = yearRange.value
   if (selectedYear === range[1]) {
     const maxMonth = props.maxDate ? parseInt(props.maxDate.month) : 12
-    const selectedMonth = parseInt(selectedDate.value.month)
+    const selectedMonth = parseInt(selectedDate.month)
     const maxDay = props.maxDate ? parseInt(props.maxDate.day) : 31
     return selectedMonth < maxMonth || (selectedMonth === maxMonth && parseInt(day) <= maxDay)
   }
 
   if (selectedYear === range[0]) {
     const minMonth = props.minDate ? parseInt(props.minDate.month) : getNewMonth(props.dateType)
-    const selectedMonth = parseInt(selectedDate.value.month)
+    const selectedMonth = parseInt(selectedDate.month)
     const minDay = props.minDate ? parseInt(props.minDate.day) : 1
     return selectedMonth > minMonth || (selectedMonth === minMonth && parseInt(day) >= minDay)
   }
 
-  return false
+  return true
 }
 </script>
 

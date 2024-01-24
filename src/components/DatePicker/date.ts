@@ -1,5 +1,6 @@
 import { format, getDaysInMonth, newDate } from 'date-fns-jalali'
-import type { DateType } from './interfaces'
+import { format as geFormat } from 'date-fns'
+import type { DateInterface, DateType } from './interfaces'
 
 /**
  * Returns week day index
@@ -7,13 +8,11 @@ import type { DateType } from './interfaces'
  * @param dateType
  * @param yearIndex
  * @param monthIndex
- * @param dayIndex
  */
 export function getNewDayInMonth(
   dateType: DateType,
   yearIndex: number,
-  monthIndex: number,
-  dayIndex: number
+  monthIndex: number
 ): number {
   const curDate = new Date(yearIndex, monthIndex - 1, 1)
   let day
@@ -95,15 +94,84 @@ export function getNewYear(dateType: DateType): number {
  */
 export function getDays(dateType: DateType, yearIndex: number, monthIndex: number): number {
   const curDate = new Date(yearIndex, monthIndex, 0)
+  let jDate: Date = new Date()
   let days
   switch (dateType) {
     case 'gregorian':
       days = curDate.getDate()
       break
     case 'jalali':
-      const jDate = newDate(curDate.getFullYear(), curDate.getMonth(), 1)
+      jDate = newDate(curDate.getFullYear(), curDate.getMonth(), 1)
       days = getDaysInMonth(jDate)
       break
   }
   return days
+}
+
+
+/**
+ * Returns Formatted date in string
+ * @type string
+ * @param dateType
+ * @param formatDate
+ * @param date
+ */
+export function DateToString(dateType: DateType, formatDate: string, date: DateInterface) {
+  try {
+    let dateFormattedStr: string = ''
+    switch (dateType) {
+      case 'jalali':
+        dateFormattedStr = format(
+          newDate(
+            parseInt(date.year),
+            parseInt(date.month) - 1,
+            parseInt(date.day)
+          ),
+          formatDate)
+        break
+      case 'gregorian':
+        dateFormattedStr = geFormat(new Date(
+          parseInt(date.year),
+          parseInt(date.month),
+          parseInt(date.day)
+        ), formatDate)
+        break
+    }
+    return dateFormattedStr.length == 10 ? dateFormattedStr : ''
+  } catch (e) {
+    return ''
+  }
+}
+
+/**
+ * Returns Object of date
+ * @type DateInterface* @param separator
+ * @param dateType
+ * @param date
+ * @param separator
+ */
+export function DateToObject(dateType: DateType, date: string) {
+  let dateInArray: string[] = []
+  switch (dateType) {
+    case 'jalali':
+      dateInArray = [
+        date.substring(8, 10),
+        date.substring(5, 7),
+        date.substring(0, 4)
+      ]
+      break
+    case 'gregorian':
+      dateInArray = [
+        new Date(date).getDate().toString(),
+        new Date(date).getMonth().toString(),
+        new Date(date).getFullYear().toString()
+      ]
+      break
+  }
+  const dateObject: DateInterface = {
+    day: dateInArray[0],
+    month: dateInArray[1],
+    year: dateInArray[2]
+  }
+  return dateObject
 }
