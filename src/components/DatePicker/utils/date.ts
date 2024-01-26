@@ -1,6 +1,6 @@
 import { format, getDaysInMonth, newDate } from 'date-fns-jalali'
 import { format as geFormat } from 'date-fns'
-import type { DateInterface, DateType } from './interfaces'
+import type { DateInterface, DateType } from '../interfaces'
 
 /**
  * Returns week day index
@@ -174,4 +174,38 @@ export function DateToObject(dateType: DateType, date: string) {
     year: dateInArray[2]
   }
   return dateObject
+}
+
+/**
+ * Returns next month
+ *
+ * @type string
+ * @param month
+ */
+export function getNextMonth(month: string): string {
+  const monthNum: number = parseInt(month)
+  let nextMonth: string = ''
+  if (monthNum == 12) {
+    nextMonth = '1'
+  } else {
+    nextMonth = `${monthNum + 1}`
+  }
+  return nextMonth
+}
+
+/**
+ * Returns previous month in date type
+ *
+ * @type string
+ * @param month
+ */
+export function getPrevMonth(month: string): string {
+  const monthNum: number = parseInt(month)
+  let nextMonth: string = ''
+  if (monthNum == 1) {
+    nextMonth = '12'
+  } else {
+    nextMonth = `${monthNum - 1}`
+  }
+  return nextMonth
 }

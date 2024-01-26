@@ -1,18 +1,20 @@
 /**
- * ```ts
+ * ```json
  *  DateType = 'jalali' | 'gregorian'
  *  ```
  **/
 export type DateType = 'jalali' | 'gregorian'
 
 /**
- * ```ts
+ * ```json
  *  {
  *    dateType: DateType
  *    range: boolean
  *    minDate: string
  *    maxDate: string
  *    format: string
+ *    isConsecutiveMonth: boolean
+ *    nextMonth: boolean
  *  }
  *  ```
  **/
@@ -22,10 +24,12 @@ export interface ConfigInterface {
   minDate: string
   maxDate: string
   format: string
+  isConsecutiveMonth: boolean
+  nextMonth: boolean
 }
 
 /**
- * ```ts
+ * ```json
  *  {
  *    year: string,
  *    month: string,
@@ -40,7 +44,7 @@ export interface DateInterface {
 }
 
 /**
- * ```ts
+ * ```json
  *  {
  *    year: string,
  *    month: string,
@@ -54,7 +58,7 @@ export interface DateRangeInterface {
 }
 
 /**
- * ```ts
+ * ```json
  *  {
  *   first: DateRangeInterface[],
  *   second: DateRangeInterface[]
@@ -67,14 +71,14 @@ export interface DateRangePickerInterface {
 }
 
 /**
- * ```ts
+ * ```json
  *  'date' | 'month' | 'year'
  *  ```
  **/
-export type TriggerInterface = 'date' | 'month' | 'year'
+export type StepType = 'date' | 'month' | 'year'
 
 /**
- * ```ts
+ * ```json
  *  {
  *   range: number[]
  *   pages: number
@@ -87,7 +91,7 @@ export interface YearInterface {
 }
 
 /**
- * ```ts
+ * ```json
  *  {
  *    value: string
  *    config?: ConfigInterface
@@ -100,17 +104,21 @@ export interface DatePickerInterface {
 }
 
 /**
- * ```ts
+ * ```json
  *  {
- *    date: string
- *    minDate: string
- *    maxDate: string
+ *    step: Step
+ *    date: DateInterface
+ *    minDate: DateInterface
+ *    maxDate: DateInterface
  *    dateType: DateType
  *    isStartDatePicker: boolean
+ *    format: string
+ *    range: boolean
  *  }
  *  ```
  **/
 export interface SinglePickerInterface {
+  step: StepType
   date: DateInterface
   minDate: DateInterface
   maxDate: DateInterface
@@ -120,7 +128,17 @@ export interface SinglePickerInterface {
   range: boolean
 }
 
-// Method props
+// Steps Props
 /**
- *
- */
+ * ```json
+ *  {
+ *    step: Step
+ *    dateType: DateType
+ *  }
+ *  ```
+ *  */
+export interface StepsPropsInterface {
+  step: StepType
+  dateType: DateType
+}
+

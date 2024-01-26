@@ -1,14 +1,16 @@
 <script setup lang="ts">
-import { computed, inject, onMounted, ref } from 'vue'
+import { computed, inject, nextTick, onMounted, ref, watch } from 'vue'
 import type { Ref } from 'vue'
-import DatePickerSingle from './CalendarSingle.vue'
-import DefaultConf from './defaultConf.json'
+import { CalendarSingle as DatePickerSingle } from './components/index'
+import DefaultConf from './assets/defaultConf.json'
 import type {
   ConfigInterface, DateInterface,
   DatePickerInterface,
-  DateRangePickerInterface
+  DateRangePickerInterface, StepType
 } from './interfaces'
-import { DateToObject, DateToString } from './date'
+import { dateFP } from './utils/index'
+import StepsTrig from './components/StepsTrig.vue'
+import { getNextMonth, getPrevMonth } from './utils/date'
 
 // Props from parent component
 const props = defineProps<DatePickerInterface>()
@@ -21,8 +23,13 @@ const dateConfig = (inject('akDatepickerConf') || props.config || DefaultConf) a
 const isShowDate: Ref<boolean> = ref(false)
 const selectedDateFirst: Ref<DateInterface> = ref({ day: '', month: '', year: '' })
 const selectedDateSecond: Ref<DateInterface> = ref({ day: '', month: '', year: '' })
+const stepFirst: Ref<StepType> = ref('year')
+const stepSecond: Ref<StepType> = ref('year')
 
 // Computed properties
+const StepSecond = computed(() => {
+  return dateConfig.isConsecutiveMonth ? 'date' : 'year'
+})
 const dateString = computed(() => {
   let dateInString: string
   let dateInObject: { start: DateInterface; finish: DateInterface } = {
@@ -30,8 +37,8 @@ const dateString = computed(() => {
     finish: { day: '', month: '', year: '' }
   }
   if (dateConfig.range) {
-    const firstDate: string = DateToString(dateConfig.dateType, dateConfig.format, selectedDateFirst.value)
-    const secondDate: string = DateToString(dateConfig.dateType, dateConfig.format, selectedDateSecond.value)
+    const firstDate: string = dateFP.DateToString(dateConfig.dateType, dateConfig.format, selectedDateFirst.value)
+    const secondDate: string = dateFP.DateToString(dateConfig.dateType, dateConfig.format, selectedDateSecond.value)
     dateInString = `${firstDate}${firstDate && secondDate ? '|' : ''}${secondDate}`
     if (
       Object.values(selectedDateFirst.value).join('') != '' &&
@@ -44,7 +51,7 @@ const dateString = computed(() => {
       emit('update:value', dateInObject)
     }
   } else {
-    dateInString = DateToString(dateConfig.dateType, dateConfig.format, selectedDateFirst.value)
+    dateInString = dateFP.DateToString(dateConfig.dateType, dateConfig.format, selectedDateFirst.value)
   }
   emit('update:value', dateInString)
   return dateInString
@@ -62,20 +69,53 @@ const dateRange = computed(() => {
     }
   }
 
-  ranges.first.start = DateToObject(dateConfig.dateType, dateConfig.minDate)
-  ranges.second.finish = DateToObject(dateConfig.dateType, dateConfig.maxDate)
-  if (Object.values(selectedDateFirst.value).join('') != '') {
+  ranges.first.start = dateFP.DateToObject(dateConfig.dateType, dateConfig.minDate)
+  ranges.second.finish = dateFP.DateToObject(dateConfig.dateType, dateConfig.maxDate)
+  if (
+    Object.values(selectedDateFirst.value).join('') != '' &&
+    !dateConfig.isConsecutiveMonth
+  ) {
     ranges.second.start = selectedDateFirst.value
   } else {
     ranges.second.start = ranges.first.start
   }
-  if (Object.values(selectedDateSecond.value).join('') != '') {
+  if (
+    Object.values(selectedDateSecond.value).join('') != '' &&
+    !dateConfig.isConsecutiveMonth
+  ) {
     ranges.first.finish = selectedDateSecond.value
   } else {
     ranges.first.finish = ranges.second.finish
   }
 
   return ranges
+})
+
+const isNotConsecutive = computed(() => {
+  return (dateConfig.isConsecutiveMonth &&
+      selectedDateFirst.value.year != '' &&
+      selectedDateFirst.value.month != '' &&
+      stepFirst.value === 'date') ||
+    !dateConfig.isConsecutiveMonth
+})
+
+// Watcher
+watch(stepFirst, (newStep, oldStep) => {
+  if (oldStep === 'month') {
+    const newMonth: string = selectedDateFirst.value.month
+    console.log(newStep)
+    selectedDateSecond.value.year = selectedDateFirst.value.year
+    if (newMonth != '' && dateConfig.isConsecutiveMonth) {
+      if (!dateConfig.nextMonth) {
+        selectedDateSecond.value.month = newMonth
+        nextTick(() => {
+          selectedDateFirst.value.month = getPrevMonth(newMonth)
+        })
+      } else {
+        selectedDateSecond.value.month = getNextMonth(newMonth)
+      }
+    }
+  }
 })
 // On mounted hook
 onMounted(() => {
@@ -84,7 +124,6 @@ onMounted(() => {
 
 // Methods
 function closeDatePicker(datePickerIndex: number) {
-  console.log(datePickerIndex)
   if (!dateConfig.range && dateString.value.length == 10) {
     isShowDate.value = false
   } else if (datePickerIndex == 1 && dateString.value.length == 21) {
@@ -106,38 +145,58 @@ function closeDatePicker(datePickerIndex: number) {
       v-if="isShowDate"
       class="ak-absolute ak-max-h-min ak-min-h-112 ak-min-w-6 ak-max-w-min ak-rounded-lg ak-bg-[var(--bg-main)] ak-p-6 ak-text-white"
     >
+      <template v-if="dateConfig.isConsecutiveMonth">
+        <StepsTrig class="ak-w-1/2" v-model:step="stepFirst" :dateType="dateConfig.dateType" />
+      </template>
       <p class="ak-mx-auto ak-block ak-h-3 ak-max-w-max ak-font-semibold ak-text-[color:var(--main-color)]">
-        {{ DateToString(dateConfig.dateType, dateConfig.format, selectedDateFirst) }}
+        {{ dateFP.DateToString(dateConfig.dateType, dateConfig.format, selectedDateFirst) }}
         {{ dateConfig.range ? ' _ ' : '' }}
-        {{ DateToString(dateConfig.dateType, dateConfig.format, selectedDateSecond)
+        {{ dateFP.DateToString(dateConfig.dateType, dateConfig.format, selectedDateSecond)
         }}
       </p>
       <br />
-      <div class="ak-flex ak-flex-row ak-gap-1">
-        <DatePickerSingle
-          name="startDate"
-          v-model:date="selectedDateFirst"
-          :dateType="dateConfig.dateType"
-          :minDate="dateRange.first.start"
-          :maxDate="dateRange.first.finish"
-          :isStartDatePicker="true"
-          :format="dateConfig.format"
-          :range="dateConfig.range"
-          @close="closeDatePicker(0)"
-        />
+      <div class="ak-w-132 ak-flex ak-flex-row ak-gap-1">
+        <div class="ak-w-full ak-flex ak-flex-col ak-items-center ak-justify-between ak-gap-6">
+          <div v-if="!dateConfig.isConsecutiveMonth" class="ak-h-10">
+            <StepsTrig v-model:step="stepFirst" :dateType="dateConfig.dateType" />
+          </div>
+          <DatePickerSingle
+            :class="{
+            'ak-w-full': !isNotConsecutive,
+            'ak-w-60': isNotConsecutive,
+            }"
+            v-model:step="stepFirst"
+            name="startDate"
+            v-model:date="selectedDateFirst"
+            :dateType="dateConfig.dateType"
+            :minDate="dateRange.first.start"
+            :maxDate="dateRange.first.finish"
+            :isStartDatePicker="true"
+            :format="dateConfig.format"
+            :range="dateConfig.range"
+            @close="closeDatePicker(0)"
+          />
+        </div>
         <br />
-        <DatePickerSingle
-          name="finishDate"
-          v-if="dateConfig.range"
-          v-model:date="selectedDateSecond"
-          :dateType="dateConfig.dateType"
-          :minDate="dateRange.second.start"
-          :maxDate="dateRange.second.finish"
-          :isStartDatePicker="false"
-          :format="dateConfig.format"
-          :range="dateConfig.range"
-          @close="closeDatePicker(1)"
-        />
+        <div v-if="isNotConsecutive" class="ak-flex ak-flex-col ak-items-center ak-justify-between ak-gap-6">
+          <div v-if="!dateConfig.isConsecutiveMonth" class="ak-h-10">
+            <StepsTrig v-model:step="stepSecond" :dateType="dateConfig.dateType" />
+          </div>
+          <DatePickerSingle
+            class="ak-w-60"
+            v-model:step="StepSecond"
+            name="finishDate"
+            v-if="dateConfig.range"
+            v-model:date="selectedDateSecond"
+            :dateType="dateConfig.dateType"
+            :minDate="dateRange.second.start"
+            :maxDate="dateRange.second.finish"
+            :isStartDatePicker="false"
+            :format="dateConfig.format"
+            :range="dateConfig.range"
+            @close="closeDatePicker(1)"
+          />
+        </div>
       </div>
     </div>
   </main>

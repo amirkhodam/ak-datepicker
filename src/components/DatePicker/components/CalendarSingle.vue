@@ -5,16 +5,11 @@ import type { Ref, ComputedRef, UnwrapNestedRefs } from 'vue'
 import type {
   DateInterface,
   SinglePickerInterface,
-  TriggerInterface,
+  StepType,
   YearInterface
-} from './interfaces'
-import Translation from './translation.json'
-import {
-  getNewDayInMonth,
-  getNewMonth,
-  getNewYear,
-  getDays
-} from './date'
+} from '../interfaces'
+import Translation from '/src/assets/translation.json'
+import { dateFP } from '../utils/index'
 
 // Props from parent component
 const props = defineProps<SinglePickerInterface>()
@@ -24,16 +19,15 @@ const props = defineProps<SinglePickerInterface>()
  *    emit('update:date', dateString.value)
  *  ```
  */
-const emit = defineEmits(['update:date', 'close'])
+const emit = defineEmits(['update:date', 'update:step', 'close'])
 
 // Initialize local properties
 const translation = ref(
   Translation as Record<
     string,
-    { months: string[]; days: string[]; status: Record<TriggerInterface, string> }
+    { months: string[]; days: string[]; status: Record<StepType, string> }
   >
 )
-const selectionTrigger: Ref<TriggerInterface> = ref('date')
 const selectedDate: UnwrapNestedRefs<DateInterface> = reactive(props.date)
 
 const dateCurrentPage: Ref<number> = ref(0)
@@ -46,9 +40,9 @@ const dateCurrentPage: Ref<number> = ref(0)
  * @returns Index of first week day of selected month 0-7
  */
 const firstDayOfMonth: ComputedRef<number> = computed((): number => {
-  const monthIndex: number = parseInt(selectedDate.month) || getNewMonth(props.dateType)
-  const yearIndex: number = parseInt(selectedDate.year) || getNewYear(props.dateType)
-  return getNewDayInMonth(props.dateType, yearIndex, monthIndex)
+  const monthIndex: number = parseInt(selectedDate.month) || dateFP.getNewMonth(props.dateType)
+  const yearIndex: number = parseInt(selectedDate.year) || dateFP.getNewYear(props.dateType)
+  return dateFP.getNewDayInMonth(props.dateType, yearIndex, monthIndex)
 })
 
 /**
@@ -65,7 +59,7 @@ const yearRange: ComputedRef<YearInterface> = computed((): YearInterface => {
   if (props.maxDate && props.minDate) {
     range.value = [parseInt(props.minDate.year), parseInt(props.maxDate.year)]
   } else {
-    range.value = [getNewYear(props.dateType) - 20, getNewYear(props.dateType) + 20]
+    range.value = [dateFP.getNewYear(props.dateType) - 20, dateFP.getNewYear(props.dateType) + 20]
   }
   return {
     range: range.value,
@@ -90,7 +84,6 @@ const selectedDay: ComputedRef<number> = computed((): number => {
 onMounted(() => {
   const dateCheck: boolean =
     selectedDate.year != '' && selectedDate.month != '' && selectedDate.day != '' // Check initialized default date value
-  selectionTrigger.value = dateCheck ? 'date' : 'year' // Change selectionTrigger 'date' if date initialized and 'year' if not
 })
 
 // Methods
@@ -120,7 +113,7 @@ function setDate(day: string): void {
  */
 function setYear(duration: number, year: number): void {
   selectedDate.year = getYear(duration, year).toString()
-  selectionTrigger.value = 'month'
+  emit('update:step', 'month')
 }
 
 
@@ -136,7 +129,7 @@ function setMonth(season: number, month: number): void {
   const monthSelected: number = (season - 1) * 3 + month
   if (monthInRangeChecker(monthSelected.toString())) {
     selectedDate.month = addZero(((season - 1) * 3 + month).toString())
-    selectionTrigger.value = 'date'
+    emit('update:step', 'date')
   }
 }
 
@@ -192,7 +185,7 @@ function getDay(week: number, dayIndex: number): string {
   } // Minus 1 because week starts from saturday in jalali
   return day > 0 &&
   day <=
-  getDays(props.dateType, parseInt(selectedDate.year), parseInt(selectedDate.month))
+  dateFP.getDays(props.dateType, parseInt(selectedDate.year), parseInt(selectedDate.month))
     ? day.toString()
     : ''
 }
@@ -212,10 +205,10 @@ function monthInRangeChecker(month: string): boolean {
   if (selectedYear < range[1] && selectedYear > range[0]) {
     return true
   } else if (selectedYear == range[1]) {
-    const maxMonth = props.maxDate ? parseInt(props.maxDate.month) : getNewMonth(props.dateType) - 1
+    const maxMonth = props.maxDate ? parseInt(props.maxDate.month) : dateFP.getNewMonth(props.dateType) - 1
     return parseInt(month) <= maxMonth
   } else if (selectedYear == range[0]) {
-    const minMonth = props.minDate ? parseInt(props.minDate.month) : getNewMonth(props.dateType) - 1
+    const minMonth = props.minDate ? parseInt(props.minDate.month) : dateFP.getNewMonth(props.dateType) - 1
     return parseInt(month) >= minMonth
   } else {
     return false
@@ -265,7 +258,7 @@ function dateInRangeChecker(day: string): boolean {
   }
 
   if (selectedYear === range[0]) {
-    const minMonth = props.minDate ? parseInt(props.minDate.month) : getNewMonth(props.dateType)
+    const minMonth = props.minDate ? parseInt(props.minDate.month) : dateFP.getNewMonth(props.dateType)
     const selectedMonth = parseInt(selectedDate.month)
     const minDay = props.minDate ? parseInt(props.minDate.day) : 1
     return selectedMonth > minMonth || (selectedMonth === minMonth && parseInt(day) >= minDay)
@@ -277,23 +270,6 @@ function dateInRangeChecker(day: string): boolean {
 
 <template>
   <main class="ak-border-3 ak-flex ak-flex-col ak-gap-0.5">
-    <div
-      class="ak-mx-auto ak-mb-3 ak-flex ak-max-w-min ak-flex-row ak-gap-0.5 ak-rounded ak-bg-[--select-trigger-bg] ak-p-1"
-    >
-      <button
-        v-for="(status, key, index) in translation[dateType].status"
-        :class="{
-          'ak-bg-[var(--primary-color)]': selectionTrigger == key.toString(),
-          'ak-py-0.5': true,
-          'ak-px-1': true,
-          'ak-rounded': true
-        }"
-        :key="`statusTrigger-${index}`"
-        @click="selectionTrigger = key"
-      >
-        {{ status.charAt(0).toUpperCase() + status.slice(1) }}
-      </button>
-    </div>
     <div class="ak-mx-auto ak-flex ak-min-w-min ak-flex-row ak-gap-0.5">
       <span class="ak-text-base ak-font-normal ak-text-[--main-color]">
         {{ selectedDate.year }}
@@ -302,7 +278,7 @@ function dateInRangeChecker(day: string): boolean {
     </div>
     <div>
       <div name="selectionBox" id="selectionBox">
-        <div class="ak-h-60 ak-w-60" name="years" id="selectionYear" v-if="selectionTrigger === 'year'">
+        <div class="ak-min-h-60 h-full ak-w-full" name="years" id="selectionYear" v-if="step === 'year'">
           <div name="yearNav" class="ak-flex ak-h-6 ak-flex-row ak-justify-between">
             <button
               :class="{
@@ -333,7 +309,7 @@ function dateInRangeChecker(day: string): boolean {
               &gt;
             </button>
           </div>
-          <table class="ak-h-full ak-w-full ak-overflow-hidden ak-p-1" name="years">
+          <table class="ak-min-h-60 ak-w-full ak-overflow-hidden ak-p-1" name="years">
             <tr v-for="duration in 4" :key="`duration-${duration}`">
               <td
                 :class="{
@@ -349,7 +325,7 @@ function dateInRangeChecker(day: string): boolean {
             </tr>
           </table>
         </div>
-        <div class="ak-h-60 ak-w-60" name="months" v-else-if="selectionTrigger === 'month'">
+        <div class="ak-h-60 ak-w-full" name="months" v-else-if="step === 'month'">
           <div class="ak-flex ak-h-6"></div>
           <table class="ak-h-full ak-w-full">
             <tr v-for="season in 4" :key="`season-${season}`">
@@ -370,7 +346,7 @@ function dateInRangeChecker(day: string): boolean {
             </tr>
           </table>
         </div>
-        <div class="ak-h-60 ak-w-60" name="days" v-else-if="selectionTrigger === 'date'">
+        <div class="ak-h-full ak-w-full" name="days" v-else-if="step === 'date'">
           <div class="ak-flex ak-h-6"></div>
           <table class="ak-h-full ak-w-full">
             <thead>
