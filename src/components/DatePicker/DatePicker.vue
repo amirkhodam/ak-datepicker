@@ -6,11 +6,12 @@ import DefaultConf from './assets/defaultConf.json'
 import type {
   ConfigInterface, DateInterface,
   DatePickerInterface,
-  DateRangePickerInterface, StepType
+  DateRangePickerInterface, MessagesInterface, StepType
 } from './interfaces'
 import { dateFP } from './utils/index'
 import StepsTrig from './components/StepsTrig.vue'
 import { getNextMonth, getPrevMonth } from './utils/date'
+import { messages } from '../localization/index'
 
 // Props from parent component
 const props = defineProps<DatePickerInterface>()
@@ -30,6 +31,7 @@ const stepSecond: Ref<StepType> = ref('year')
 const StepSecond = computed(() => {
   return dateConfig.isConsecutiveMonth ? 'date' : 'year'
 })
+
 const dateString = computed(() => {
   let dateInString: string
   let dateInObject: { start: DateInterface; finish: DateInterface } = {
@@ -99,11 +101,25 @@ const isNotConsecutive = computed(() => {
     !dateConfig.isConsecutiveMonth
 })
 
+const Lang = computed(() => {
+  if (props.lang) {
+    return props.lang
+  } else {
+    return 'en'
+  }
+})
+
+const Messages = computed(() => {
+  if (props.messages) {
+    return props.messages[Lang.value]
+  } else {
+    return (messages as MessagesInterface)[Lang.value]
+  }
+})
 // Watcher
 watch(stepFirst, (newStep, oldStep) => {
   if (oldStep === 'month') {
     const newMonth: string = selectedDateFirst.value.month
-    console.log(newStep)
     selectedDateSecond.value.year = selectedDateFirst.value.year
     if (newMonth != '' && dateConfig.isConsecutiveMonth) {
       if (!dateConfig.nextMonth) {
@@ -146,7 +162,7 @@ function closeDatePicker(datePickerIndex: number) {
       class="ak-absolute ak-max-h-min ak-min-h-112 ak-min-w-6 ak-max-w-min ak-rounded-lg ak-bg-[var(--bg-main)] ak-p-6 ak-text-white"
     >
       <template v-if="dateConfig.isConsecutiveMonth">
-        <StepsTrig class="ak-w-1/2" v-model:step="stepFirst" :dateType="dateConfig.dateType" />
+        <StepsTrig class="ak-w-1/2" v-model:step="stepFirst" :dateType="dateConfig.dateType" :messages="Messages" />
       </template>
       <p class="ak-mx-auto ak-block ak-h-3 ak-max-w-max ak-font-semibold ak-text-[color:var(--main-color)]">
         {{ dateFP.DateToString(dateConfig.dateType, dateConfig.format, selectedDateFirst) }}
@@ -158,7 +174,7 @@ function closeDatePicker(datePickerIndex: number) {
       <div class="ak-w-132 ak-flex ak-flex-row ak-gap-1">
         <div class="ak-w-full ak-flex ak-flex-col ak-items-center ak-justify-between ak-gap-6">
           <div v-if="!dateConfig.isConsecutiveMonth" class="ak-h-10">
-            <StepsTrig v-model:step="stepFirst" :dateType="dateConfig.dateType" />
+            <StepsTrig v-model:step="stepFirst" :dateType="dateConfig.dateType" :messages="Messages" />
           </div>
           <DatePickerSingle
             :class="{
@@ -174,13 +190,15 @@ function closeDatePicker(datePickerIndex: number) {
             :isStartDatePicker="true"
             :format="dateConfig.format"
             :range="dateConfig.range"
+            :lang="Lang"
+            :messages="Messages"
             @close="closeDatePicker(0)"
           />
         </div>
         <br />
         <div v-if="isNotConsecutive" class="ak-flex ak-flex-col ak-items-center ak-justify-between ak-gap-6">
           <div v-if="!dateConfig.isConsecutiveMonth" class="ak-h-10">
-            <StepsTrig v-model:step="stepSecond" :dateType="dateConfig.dateType" />
+            <StepsTrig v-model:step="stepSecond" :dateType="dateConfig.dateType" :messages="Messages" />
           </div>
           <DatePickerSingle
             class="ak-w-60"
@@ -194,6 +212,8 @@ function closeDatePicker(datePickerIndex: number) {
             :isStartDatePicker="false"
             :format="dateConfig.format"
             :range="dateConfig.range"
+            :lang="Lang"
+            :messages="Messages"
             @close="closeDatePicker(1)"
           />
         </div>

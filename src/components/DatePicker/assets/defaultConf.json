@@ -1,7 +1,7 @@
 {
-  "dateType": "jalali",
-  "minDate": "1400-01-01",
-  "maxDate": "1402-01-01",
+  "dateType": "gregorian",
+  "minDate": "1990-01-01",
+  "maxDate": "2024-01-01",
   "range": true,
   "format": "yyyy-MM-dd",
   "isConsecutiveMonth": true,

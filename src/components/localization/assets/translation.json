@@ -1,0 +1,120 @@
+{
+  "en": {
+    "from": "From",
+    "to": "To",
+    "status": {
+      "year": "Year",
+      "month": "Month",
+      "date": "Date"
+    },
+    "jalali": {
+      "months": [
+        "Farvardin",
+        "Ordibehesht",
+        "Khordad",
+        "Tir",
+        "Mordad",
+        "Shahrivar",
+        "Mehr",
+        "Aban",
+        "Azar",
+        "Dey",
+        "Bahman",
+        "Esfand"
+      ],
+      "days": {
+        "sat": "Saturday",
+        "sun": "Sunday",
+        "mon": "Monday",
+        "tue": "Tuesday",
+        "wen": "Wednesday",
+        "thu": "Thursday",
+        "fri": "Friday"
+      }
+    },
+    "gregorian": {
+      "months": [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December"
+      ],
+      "days": {
+        "sat": "Saturday",
+        "sun": "Sunday",
+        "mon": "Monday",
+        "tue": "Tuesday",
+        "wen": "Wednesday",
+        "thu": "Thursday",
+        "fri": "Friday"
+      }
+    }
+  },
+  "fa": {
+    "from": "از",
+    "to": "تا",
+    "status": {
+      "year": "سال",
+      "month": "ماه",
+      "date": "روز"
+    },
+    "jalali": {
+      "months": [
+        "فروردین",
+        "اردیبهشت",
+        "خرداد",
+        "تیر",
+        "مرداد",
+        "شهریور",
+        "مهر",
+        "آبان",
+        "آذر",
+        "دی",
+        "بهمن",
+        "اسفند"
+      ],
+      "days": {
+        "sat": "شنبه",
+        "sun": "یکشنبه",
+        "mon": "دوشنبه",
+        "tue": "سه‌شنبه",
+        "wen": "چهارشنبه",
+        "thu": "پنج‌شنبه",
+        "fri": "جمعه"
+      }
+    },
+    "gregorian": {
+      "months": [
+        "ژانویه",
+        "فوریه",
+        "مارس",
+        "آپریل",
+        "می",
+        "ژانویه",
+        "جولای",
+        "آگوست",
+        "سپتامبر",
+        "اکتبر",
+        "نوامبر",
+        "دسامبر"
+      ],
+      "days": {
+        "sat": "شنبه",
+        "sun": "یکشنبه",
+        "mon": "دوشنبه",
+        "tue": "سه‌شنبه",
+        "wen": "چهارشنبه",
+        "thu": "پنج‌شنبه",
+        "fri": "جمعه"
+      }
+    }
+  }
+}
