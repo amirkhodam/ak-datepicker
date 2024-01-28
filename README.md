@@ -25,7 +25,7 @@ yarn add ak-datepicker
 
 <script setup lang="ts">
   import { DatePicker } from 'ak-datepicker'
-  import 'ak-datepicker/dist/style.css'
+  import 'ak-datepicker/style.css'
   import { ref } from 'vue'
 
   const datePickerConfig = {
@@ -118,7 +118,7 @@ You must import styles to app in one of these options:
 
 ```ts
 import { createApp } from 'vue'
-import 'ak-datepicker/dist/style.css'
+import 'ak-datepicker/style.css'
 
 // Other scripts
 
@@ -134,7 +134,7 @@ createApp(App).mount('#app')
 <script setup lang="ts">
   // Other imports
   import { DatePicker } from 'ak-datepicker'
-  import 'ak-datepicker/dist/style.css'
+  import 'ak-datepicker/style.css'
   
   // Other scripts
 </script>
