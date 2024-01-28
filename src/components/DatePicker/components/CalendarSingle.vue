@@ -1,21 +1,14 @@
 <script lang="ts" setup>
 // Import requirements
-import { computed, onMounted, ref } from 'vue'
-import type { Ref, ComputedRef } from 'vue'
-import type {
+import { computed, reactive, ref } from 'vue'
+import type { Ref, ComputedRef, UnwrapNestedRefs } from 'vue'
+import {
   DateInterface,
   SinglePickerInterface,
-  TriggerInterface,
+  WeekDayType,
   YearInterface
-} from './interfaces'
-import Translation from './translation.json'
-import {
-  getNewDate,
-  getNewDayInMonth,
-  getNewMonth,
-  getNewYear,
-  getDays
-} from './date'
+} from '../interfaces'
+import { dateFP } from '../utils/index'
 
 // Props from parent component
 const props = defineProps<SinglePickerInterface>()
@@ -25,42 +18,17 @@ const props = defineProps<SinglePickerInterface>()
  *    emit('update:date', dateString.value)
  *  ```
  */
-const emit = defineEmits(['update:date'])
+const emit = defineEmits(['update:date', 'update:step', 'close'])
 
 // Initialize local properties
-const translation = ref(
-  Translation as Record<
-    string,
-    { months: string[]; days: string[]; status: Record<TriggerInterface, string> }
-  >
-)
-const selectionTrigger: Ref<TriggerInterface> = ref('date')
-const selectedDate: Ref<DateInterface> = ref({
-  year: props.date.split('-')[0] || getNewYear(props.dateType).toString() || '',
-  month:
-    props.date.split('-')[1] ||
-    (props.isStartDatePicker
-      ? addZero(getNewMonth(props.dateType).toString())
-      : addZero((getNewMonth(props.dateType) + 1).toString())) ||
-    '',
-  day: props.date.split('-')[2] || ''
-})
+const weekDays: WeekDayType[] = ['sun', 'mon', 'tue', 'wen', 'thu', 'fri', 'sat']
+const weekDaysFromSat: WeekDayType[] = ['sat', 'sun', 'mon', 'tue', 'wen', 'thu', 'fri']
+
+const selectedDate: UnwrapNestedRefs<DateInterface> = reactive(props.date)
 
 const dateCurrentPage: Ref<number> = ref(0)
 
 // Computed properties
-
-/**
- * @type ComputedRef<string>
- * @example
- * 1990-01-01
- * @returns full date in `yyyy-MM-dd`
- */
-const dateString: ComputedRef<string> = computed((): string => {
-  const strDate: string = Object.values(selectedDate.value).join('-')
-  return strDate.length == 10 ? strDate : ''
-})
-
 /**
  * @type ComputedRef<number>
  * @example
@@ -68,9 +36,9 @@ const dateString: ComputedRef<string> = computed((): string => {
  * @returns Index of first week day of selected month 0-7
  */
 const firstDayOfMonth: ComputedRef<number> = computed((): number => {
-  const monthIndex: number = parseInt(selectedDate.value.month) || getNewMonth(props.dateType)
-  const yearIndex: number = parseInt(selectedDate.value.year) || getNewYear(props.dateType)
-  return getNewDayInMonth(props.dateType, yearIndex, monthIndex, 1)
+  const monthIndex: number = parseInt(selectedDate.month) || dateFP.getNewMonth(props.dateType)
+  const yearIndex: number = parseInt(selectedDate.year) || dateFP.getNewYear(props.dateType)
+  return dateFP.getNewDayInMonth(props.dateType, yearIndex, monthIndex)
 })
 
 /**
@@ -87,7 +55,7 @@ const yearRange: ComputedRef<YearInterface> = computed((): YearInterface => {
   if (props.maxDate && props.minDate) {
     range.value = [parseInt(props.minDate.year), parseInt(props.maxDate.year)]
   } else {
-    range.value = [getNewYear(props.dateType) - 20, getNewYear(props.dateType) + 20]
+    range.value = [dateFP.getNewYear(props.dateType) - 20, dateFP.getNewYear(props.dateType) + 20]
   }
   return {
     range: range.value,
@@ -105,14 +73,15 @@ const yearRange: ComputedRef<YearInterface> = computed((): YearInterface => {
  * @returns Limitation of selectable year range and number of page
  */
 const selectedDay: ComputedRef<number> = computed((): number => {
-  return parseInt(selectedDate.value.day)
+  return parseInt(selectedDate.day)
 })
 
-// Mounted hook
-onMounted(() => {
-  const dateCheck: boolean =
-    selectedDate.value.year != '' && selectedDate.value.month != '' && selectedDate.value.day != '' // Check initialized default date value
-  selectionTrigger.value = dateCheck ? 'date' : 'year' // Change selectionTrigger 'date' if date initialized and 'year' if not
+const WeekDays: ComputedRef<WeekDayType[]> = computed(() => {
+  if (props.dateType == 'jalali') {
+    return weekDaysFromSat
+  } else {
+    return weekDays
+  }
 })
 
 // Methods
@@ -125,8 +94,9 @@ onMounted(() => {
  */
 function setDate(day: string): void {
   if (day != '' && dateInRangeChecker(day)) {
-    selectedDate.value.day = addZero(day.toString())
-    emit('update:date', dateString.value)
+    selectedDate.day = addZero(day.toString())
+    emit('update:date', selectedDate)
+    emit('close')
   }
 }
 
@@ -140,8 +110,8 @@ function setDate(day: string): void {
  * setYear(1, 5)
  */
 function setYear(duration: number, year: number): void {
-  selectedDate.value.year = getYear(duration, year).toString()
-  selectionTrigger.value = 'month'
+  selectedDate.year = getYear(duration, year).toString()
+  emit('update:step', 'month')
 }
 
 
@@ -156,8 +126,8 @@ function setYear(duration: number, year: number): void {
 function setMonth(season: number, month: number): void {
   const monthSelected: number = (season - 1) * 3 + month
   if (monthInRangeChecker(monthSelected.toString())) {
-    selectedDate.value.month = addZero(((season - 1) * 3 + month).toString())
-    selectionTrigger.value = 'date'
+    selectedDate.month = addZero(((season - 1) * 3 + month).toString())
+    emit('update:step', 'date')
   }
 }
 
@@ -213,7 +183,7 @@ function getDay(week: number, dayIndex: number): string {
   } // Minus 1 because week starts from saturday in jalali
   return day > 0 &&
   day <=
-  getDays(props.dateType, parseInt(selectedDate.value.year), parseInt(selectedDate.value.month))
+  dateFP.getDays(props.dateType, parseInt(selectedDate.year), parseInt(selectedDate.month))
     ? day.toString()
     : ''
 }
@@ -228,15 +198,15 @@ function getDay(week: number, dayIndex: number): string {
  * @param month
  */
 function monthInRangeChecker(month: string): boolean {
-  const selectedYear: number = parseInt(selectedDate.value.year)
+  const selectedYear: number = parseInt(selectedDate.year)
   const { range } = yearRange.value
   if (selectedYear < range[1] && selectedYear > range[0]) {
     return true
   } else if (selectedYear == range[1]) {
-    const maxMonth = props.maxDate ? parseInt(props.maxDate.month) : getNewMonth(props.dateType) - 1
+    const maxMonth = props.maxDate ? parseInt(props.maxDate.month) : dateFP.getNewMonth(props.dateType) - 1
     return parseInt(month) <= maxMonth
   } else if (selectedYear == range[0]) {
-    const minMonth = props.minDate ? parseInt(props.minDate.month) : getNewMonth(props.dateType) - 1
+    const minMonth = props.minDate ? parseInt(props.minDate.month) : dateFP.getNewMonth(props.dateType) - 1
     return parseInt(month) >= minMonth
   } else {
     return false
@@ -253,10 +223,10 @@ function monthInRangeChecker(month: string): boolean {
  * @param day
  */
 function SelectedDateInRangeChecker(day: string): boolean {
-  if (props.isStartDatePicker && day != '' && selectedDate.value.day != '') {
-    return parseInt(day) > parseInt(selectedDate.value.day)
-  } else if (day != '') {
-    return parseInt(day) < parseInt(selectedDate.value.day)
+  if (props.isStartDatePicker && day != '' && selectedDate.day != '' && props.range) {
+    return parseInt(day) > parseInt(selectedDate.day)
+  } else if (day != '' && props.range) {
+    return parseInt(day) < parseInt(selectedDate.day)
   } else {
     return false
   }
@@ -272,22 +242,22 @@ function SelectedDateInRangeChecker(day: string): boolean {
  * @param day
  */
 function dateInRangeChecker(day: string): boolean {
-  if (!monthInRangeChecker(selectedDate.value.month)) {
+  if (!monthInRangeChecker(selectedDate.month)) {
     return false
   }
 
-  const selectedYear = parseInt(selectedDate.value.year)
+  const selectedYear = parseInt(selectedDate.year)
   const { range } = yearRange.value
   if (selectedYear === range[1]) {
     const maxMonth = props.maxDate ? parseInt(props.maxDate.month) : 12
-    const selectedMonth = parseInt(selectedDate.value.month)
+    const selectedMonth = parseInt(selectedDate.month)
     const maxDay = props.maxDate ? parseInt(props.maxDate.day) : 31
     return selectedMonth < maxMonth || (selectedMonth === maxMonth && parseInt(day) <= maxDay)
   }
 
   if (selectedYear === range[0]) {
-    const minMonth = props.minDate ? parseInt(props.minDate.month) : getNewMonth(props.dateType)
-    const selectedMonth = parseInt(selectedDate.value.month)
+    const minMonth = props.minDate ? parseInt(props.minDate.month) : dateFP.getNewMonth(props.dateType)
+    const selectedMonth = parseInt(selectedDate.month)
     const minDay = props.minDate ? parseInt(props.minDate.day) : 1
     return selectedMonth > minMonth || (selectedMonth === minMonth && parseInt(day) >= minDay)
   }
@@ -298,32 +268,9 @@ function dateInRangeChecker(day: string): boolean {
 
 <template>
   <main class="ak-border-3 ak-flex ak-flex-col ak-gap-0.5">
-    <div
-      class="ak-mx-auto ak-mb-3 ak-flex ak-max-w-min ak-flex-row ak-gap-0.5 ak-rounded ak-bg-[--select-trigger-bg] ak-p-1"
-    >
-      <button
-        v-for="(status, key, index) in translation[dateType].status"
-        :class="{
-          'ak-bg-[var(--primary-color)]': selectionTrigger == key.toString(),
-          'ak-py-0.5': true,
-          'ak-px-1': true,
-          'ak-rounded': true
-        }"
-        :key="`statusTrigger-${index}`"
-        @click="selectionTrigger = key"
-      >
-        {{ status.charAt(0).toUpperCase() + status.slice(1) }}
-      </button>
-    </div>
-    <div class="ak-mx-auto ak-flex ak-min-w-min ak-flex-row ak-gap-0.5">
-      <span class="ak-text-base ak-font-normal ak-text-[--main-color]">
-        {{ selectedDate.year }}
-        {{ translation[props.dateType].months[parseInt(selectedDate.month) - 1] }}
-      </span>
-    </div>
     <div>
       <div name="selectionBox" id="selectionBox">
-        <div class="ak-h-60 ak-w-60" name="years" id="selectionYear" v-if="selectionTrigger === 'year'">
+        <div class="ak-min-h-60 h-full ak-w-full" name="years" id="selectionYear" v-if="step === 'year'">
           <div name="yearNav" class="ak-flex ak-h-6 ak-flex-row ak-justify-between">
             <button
               :class="{
@@ -354,12 +301,12 @@ function dateInRangeChecker(day: string): boolean {
               &gt;
             </button>
           </div>
-          <table class="ak-h-full ak-w-full ak-overflow-hidden ak-p-1" name="years">
+          <table class="ak-min-h-60 ak-w-full ak-overflow-hidden ak-p-1" name="years">
             <tr v-for="duration in 4" :key="`duration-${duration}`">
               <td
                 :class="{
                 'ak-text-center': true,
-                 'ak-cursor-pointer hover:ak-bg-[--hover-color]' : getYear(duration, year) != ''
+                 'ak-cursor-pointer hover:ak-bg-[--calendar-hover-color] hover:ak-rounded-[--calendar-hover-year-radius]' : getYear(duration, year) != ''
               }"
                 v-for="year in 5"
                 :key="`year-${year}`"
@@ -370,15 +317,14 @@ function dateInRangeChecker(day: string): boolean {
             </tr>
           </table>
         </div>
-        <div class="ak-h-60 ak-w-60" name="months" v-else-if="selectionTrigger === 'month'">
-          <div class="ak-flex ak-h-6"></div>
+        <div v-else-if="step === 'month'" class="ak-h-60 ak-w-full" name="months">
           <table class="ak-h-full ak-w-full">
             <tr v-for="season in 4" :key="`season-${season}`">
               <td
                 :class="{
                   'ak-text-center': true,
                   'ak-opacity-50': !monthInRangeChecker(((season - 1) * 3 + month).toString()),
-                  'ak-cursor-pointer hover:ak-bg-[--hover-color]': monthInRangeChecker(
+                  'ak-cursor-pointer hover:ak-bg-[--calendar-hover-color] hover:ak-rounded-[--calendar-hover-month-radius]': monthInRangeChecker(
                     ((season - 1) * 3 + month).toString()
                   )
                 }"
@@ -386,22 +332,24 @@ function dateInRangeChecker(day: string): boolean {
                 :key="`month-${month}`"
                 @click="setMonth(season, month)"
               >
-                {{ translation[dateType].months[(season - 1) * 3 + month - 1] }}
+                {{ props.messages[props.dateType].months[(season - 1) * 3 + month - 1] }}
               </td>
             </tr>
           </table>
         </div>
-        <div class="ak-h-60 ak-w-60" name="days" v-else-if="selectionTrigger === 'date'">
+        <div v-else-if="step === 'date'" class="ak-h-full ak-w-full" name="days">
           <div class="ak-flex ak-h-6"></div>
           <table class="ak-h-full ak-w-full">
             <thead>
             <tr class="ak-h-3 ak-pb-1">
               <td
-                v-for="weekDay in translation[dateType].days"
+                v-for="weekDay in WeekDays"
                 :key="`weekDay-${weekDay}`"
-                class="ak-pb-1 ak-text-center ak-text-sm ak-font-light"
+                class="ak-w-10 ak-pb-1 ak-text-center ak-text-sm ak-font-light"
+                style="font-size: var(--calendar-week-days-font-size)"
               >
-                {{ dateType == 'gregorian' ? weekDay.substring(0, 3) : weekDay[0] }}
+                {{ props.lang == 'fa' ? props.messages[dateType].days[weekDay][0] : weekDay.substring(0, 3).toUpperCase()
+                }}
               </td>
             </tr>
             </thead>
@@ -411,14 +359,21 @@ function dateInRangeChecker(day: string): boolean {
                 :key="`day-${day}`"
                 :class="{
                   'ak-text-center': true,
-                  'ak-flex-inline ak-h-8 ak-w-8 ak-items-center ak-justify-center': true,
-                  'ak-bg-[--primary-color]': selectedDay == parseInt(getDay(week, day)),
-                  'ak-translate ak-bg-[--in-range-date-bg] ak-bg-opacity-[0.7]': SelectedDateInRangeChecker(
+                  'ak-flex-inline ak-h-10 ak-w-10 ak-items-center ak-justify-center': true,
+                  'ak-bg-[--calendar-is-range-date-bg]': selectedDay == parseInt(getDay(week, day)),
+                  'ak-rounded-l-[--calendar-is-range-radius]': selectedDay == parseInt(getDay(week, day)) && isStartDatePicker,
+                  'ak-rounded-r-full': selectedDay == parseInt(getDay(week, day)) && !isStartDatePicker,
+                  'ak-translate ak-bg-[--calendar-in-range-date-bg] ak-bg-opacity-[0.7] hover:ak-rounded-none': SelectedDateInRangeChecker(
                     getDay(week, day)
                   ),
-                  'ak-cursor-pointer hover:ak-bg-[--hover-color]':
+                  'ak-cursor-pointer hover:ak-bg-[--calendar-hover-color]':
                     getDay(week, day) != '' && dateInRangeChecker(getDay(week, day).toString()),
-                  'ak-opacity-50': !dateInRangeChecker(getDay(week, day).toString())
+                  'ak-opacity-50': !dateInRangeChecker(getDay(week, day).toString()),
+                  'hover:ak-rounded-[--calendar-hover-date-radius]':
+                    getDay(week, day) != '' &&
+                    dateInRangeChecker(getDay(week, day).toString()) &&
+                    selectedDay != parseInt(getDay(week, day))&&
+                    !SelectedDateInRangeChecker(getDay(week, day)),
                 }"
                 @click="setDate(getDay(week, day).toString())"
               >

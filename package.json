@@ -5,6 +5,28 @@
   "files": [
     "dist"
   ],
+  "keywords": [
+    "vue",
+    "vue3",
+    "date-picker",
+    "calendar",
+    "jalali",
+    "gregorian",
+    "web-component",
+    "frontend",
+    "tailwindcss",
+    "customizable",
+    "npm-package",
+    "open-source",
+    "developer-tools",
+    "date-range",
+    "component-library",
+    "user-interface",
+    "responsive",
+    "accessibility",
+    "localization",
+    "web-development"
+  ],
   "main": "./dist/ak-datepicker.umd.cjs",
   "module": "./dist/ak-datepicker.js",
   "style": "dist/style.css",
@@ -23,6 +45,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "date-fns": "^3.3.1",
     "date-fns-jalali": "^2.30.0-0",
     "eslint": "^8.56.0",
     "prettier": "^3.1.1",
