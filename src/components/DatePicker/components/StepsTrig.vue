@@ -22,14 +22,17 @@ const selectedStep = computed(() => {
 </script>
 <template>
   <main
-    class="ak-mx-auto ak-mb-3 ak-flex ak-min-w-min ak-flex-row ak-justify-between ak-items-center ak-gap-0.5 ak-rounded ak-bg-[--select-trigger-bg] ak-p-1"
+    class="ak-mx-auto ak-flex ak-min-w-min ak-flex-row ak-justify-between ak-items-center \
+           ak-gap-[--trigger-gap] ak-rounded-[--trigger-rounded] ak-bg-[--select-trigger-bg] ak-p-1"
   >
     <button
       v-for="(step, index) in steps"
       :class="{
-              'ak-bg-[var(--primary-color)]': selectedStep == step.toString(),
-              'ak-w-1/4 ak-py-0.5 ak-px-1 ak-rounded': true,
+              'ak-bg-[var(--primary-color)] !ak-text-[--trigger-active-text-color]': selectedStep == step.toString(),
+              '!ak-text-[--trigger-inactive-text-color]': selectedStep != step.toString(),
+              '!ak-px-[--trigger-x-padding] !ak-py-[--trigger-y-padding] ak-rounded-[--trigger-btn-rounded]': true,
             }"
+      style="font-size: var(--trigger-font-size)"
       :key="`statusTrigger-${index}`"
       @click="emit('update:step', step)"
     >

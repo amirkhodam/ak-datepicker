@@ -544,12 +544,24 @@ video {
   --tw-backdrop-sepia:  ;
 }
 
+.ak-fixed {
+  position: fixed;
+}
+
 .ak-absolute {
   position: absolute;
 }
 
 .ak-relative {
   position: relative;
+}
+
+.ak-right-1\/2 {
+  right: 50%;
+}
+
+.ak-top-1\/2 {
+  top: 50%;
 }
 
 .ak-mx-auto {
@@ -561,8 +573,8 @@ video {
   margin-bottom: 0.75rem;
 }
 
-.ak-block {
-  display: block;
+.ak-mb-\[--trigger-caller-gap-datepicker\] {
+  margin-bottom: var(--trigger-caller-gap-datepicker);
 }
 
 .ak-flex {
@@ -598,10 +610,6 @@ video {
   max-height: min-content;
 }
 
-.ak-min-h-112 {
-  min-height: 28rem;
-}
-
 .ak-min-h-60 {
   min-height: 15rem;
 }
@@ -610,8 +618,8 @@ video {
   width: 50%;
 }
 
-.ak-w-1\/4 {
-  width: 25%;
+.ak-w-10 {
+  width: 2.5rem;
 }
 
 .ak-w-132 {
@@ -630,18 +638,9 @@ video {
   width: 100%;
 }
 
-.ak-min-w-6 {
-  min-width: 1.5rem;
-}
-
 .ak-min-w-min {
   min-width: -moz-min-content;
   min-width: min-content;
-}
-
-.ak-max-w-max {
-  max-width: -moz-max-content;
-  max-width: max-content;
 }
 
 .ak-max-w-min {
@@ -689,24 +688,46 @@ video {
   gap: 1.5rem;
 }
 
+.ak-gap-\[--trigger-gap\] {
+  gap: var(--trigger-gap);
+}
+
 .ak-overflow-hidden {
   overflow: hidden;
 }
 
-.ak-rounded {
-  border-radius: 0.25rem;
+.ak-rounded-\[--main-rounded\] {
+  border-radius: var(--main-rounded);
 }
 
-.ak-rounded-lg {
-  border-radius: 0.5rem;
+.ak-rounded-\[--trigger-btn-rounded\] {
+  border-radius: var(--trigger-btn-rounded);
 }
 
-.ak-bg-\[--in-range-date-bg\] {
-  background-color: var(--in-range-date-bg);
+.ak-rounded-\[--trigger-rounded\] {
+  border-radius: var(--trigger-rounded);
 }
 
-.ak-bg-\[--primary-color\] {
-  background-color: var(--primary-color);
+.ak-rounded-none {
+  border-radius: 0px;
+}
+
+.ak-rounded-l-\[--calendar-is-range-radius\] {
+  border-top-left-radius: var(--calendar-is-range-radius);
+  border-bottom-left-radius: var(--calendar-is-range-radius);
+}
+
+.ak-rounded-r-full {
+  border-top-right-radius: 9999px;
+  border-bottom-right-radius: 9999px;
+}
+
+.ak-bg-\[--calendar-in-range-date-bg\] {
+  background-color: var(--calendar-in-range-date-bg);
+}
+
+.ak-bg-\[--calendar-is-range-date-bg\] {
+  background-color: var(--calendar-is-range-date-bg);
 }
 
 .ak-bg-\[--select-trigger-bg\] {
@@ -734,18 +755,24 @@ video {
   padding: 0.5rem;
 }
 
-.ak-p-6 {
-  padding: 1.5rem;
+.\!ak-px-\[--trigger-x-padding\] {
+  padding-left: var(--trigger-x-padding) !important;
+  padding-right: var(--trigger-x-padding) !important;
 }
 
-.ak-px-1 {
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
+.\!ak-py-\[--trigger-y-padding\] {
+  padding-top: var(--trigger-y-padding) !important;
+  padding-bottom: var(--trigger-y-padding) !important;
 }
 
-.ak-py-0\.5 {
-  padding-top: 0.125rem;
-  padding-bottom: 0.125rem;
+.ak-px-\[--main-x-padding\] {
+  padding-left: var(--main-x-padding);
+  padding-right: var(--main-x-padding);
+}
+
+.ak-py-\[--main-y-padding\] {
+  padding-top: var(--main-y-padding);
+  padding-bottom: var(--main-y-padding);
 }
 
 .ak-pb-1 {
@@ -765,12 +792,12 @@ video {
   font-weight: 300;
 }
 
-.ak-font-semibold {
-  font-weight: 600;
+.\!ak-text-\[--trigger-active-text-color\] {
+  color: var(--trigger-active-text-color) !important;
 }
 
-.ak-text-\[color\:var\(--main-color\)\] {
-  color: var(--main-color);
+.\!ak-text-\[--trigger-inactive-text-color\] {
+  color: var(--trigger-inactive-text-color) !important;
 }
 
 .ak-text-white {
@@ -782,6 +809,22 @@ video {
   opacity: 0.5;
 }
 
-.hover\:ak-bg-\[--hover-color\]:hover {
-  background-color: var(--hover-color);
+.hover\:ak-rounded-\[--calendar-hover-date-radius\]:hover {
+  border-radius: var(--calendar-hover-date-radius);
+}
+
+.hover\:ak-rounded-\[--calendar-hover-month-radius\]:hover {
+  border-radius: var(--calendar-hover-month-radius);
+}
+
+.hover\:ak-rounded-\[--calendar-hover-year-radius\]:hover {
+  border-radius: var(--calendar-hover-year-radius);
+}
+
+.hover\:ak-rounded-none:hover {
+  border-radius: 0px;
+}
+
+.hover\:ak-bg-\[--calendar-hover-color\]:hover {
+  background-color: var(--calendar-hover-color);
 }
