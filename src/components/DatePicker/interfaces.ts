@@ -90,17 +90,86 @@ export interface YearInterface {
   pages: number
 }
 
+
+/**
+ * Messages (Translation) interface
+ * ```json
+ *  {
+ *      [lang: string]: {
+ *     from: string
+ *     to: string
+ *     status: {
+ *       year: string
+ *       month: string
+ *       date: string
+ *     }
+ *     jalali: {
+ *       months: string[]
+ *       days: {
+ *         [day: string]: string
+ *       }
+ *     }
+ *     gregorian: {
+ *       months: string[]
+ *       days: {
+ *         [day: string]: string
+ *       }
+ *     }
+ *   }
+ *  }
+ *  ```
+ *  */
+export interface MessagesInterface {
+  [lang: string]: {
+    from: string
+    to: string
+    status: {
+      year: string
+      month: string
+      date: string
+    }
+    jalali: {
+      months: string[]
+      days: {
+        sat: string
+        sun: string
+        mon: string
+        tue: string
+        wen: string
+        thu: string
+        fri: string
+      }
+    }
+    gregorian: {
+      months: string[]
+      days: {
+        sat: string
+        sun: string
+        mon: string
+        tue: string
+        wen: string
+        thu: string
+        fri: string
+      }
+    }
+  }
+}
+
 /**
  * ```json
  *  {
  *    value: string
  *    config?: ConfigInterface
+ *    lang: string[2]
+ *    messages: MessagesInterface
  *  }
  *  ```
  **/
 export interface DatePickerInterface {
   value: string
   config?: ConfigInterface
+  lang?: string[2]
+  messages?: MessagesInterface
 }
 
 /**
@@ -114,6 +183,8 @@ export interface DatePickerInterface {
  *    isStartDatePicker: boolean
  *    format: string
  *    range: boolean
+ *    lang: string[2]
+ *    messages: MessagesInterface
  *  }
  *  ```
  **/
@@ -126,6 +197,8 @@ export interface SinglePickerInterface {
   isStartDatePicker: boolean
   format: string
   range: boolean
+  lang: string[2]
+  messages: MessagesInterface
 }
 
 // Steps Props
@@ -134,11 +207,20 @@ export interface SinglePickerInterface {
  *  {
  *    step: Step
  *    dateType: DateType
+ *    messages: MessagesInterface
  *  }
  *  ```
  *  */
 export interface StepsPropsInterface {
   step: StepType
   dateType: DateType
+  messages: MessagesInterface
 }
 
+// Week Days
+/**
+ * ```json
+ *  WeekDayType = 'sun' | 'mon' | 'tue' | 'wen' | 'thu' | 'fri' | 'sat'
+ *  ```
+ *  */
+export type WeekDayType = 'sun' | 'mon' | 'tue' | 'wen' | 'thu' | 'fri' | 'sat'

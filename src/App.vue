@@ -7,6 +7,6 @@ const date = ref('')
 
 <template>
   <div class="w-8 h-8 ak-bg-red-600"></div>
-  <DatePicker v-model:value="date" />
+  <DatePicker v-model:value="date" lang="fa" />
 </template>
 

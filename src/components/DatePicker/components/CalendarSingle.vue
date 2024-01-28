@@ -1,14 +1,12 @@
 <script lang="ts" setup>
 // Import requirements
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import type { Ref, ComputedRef, UnwrapNestedRefs } from 'vue'
-import type {
+import {
   DateInterface,
-  SinglePickerInterface,
-  StepType,
+  SinglePickerInterface, WeekDayType,
   YearInterface
 } from '../interfaces'
-import Translation from '/src/assets/translation.json'
 import { dateFP } from '../utils/index'
 
 // Props from parent component
@@ -22,12 +20,9 @@ const props = defineProps<SinglePickerInterface>()
 const emit = defineEmits(['update:date', 'update:step', 'close'])
 
 // Initialize local properties
-const translation = ref(
-  Translation as Record<
-    string,
-    { months: string[]; days: string[]; status: Record<StepType, string> }
-  >
-)
+const weekDays: WeekDayType[] = ['sun', 'mon', 'tue', 'wen', 'thu', 'fri', 'sat']
+const weekDaysFromSat: WeekDayType[] = ['sat', 'sun', 'mon', 'tue', 'wen', 'thu', 'fri']
+
 const selectedDate: UnwrapNestedRefs<DateInterface> = reactive(props.date)
 
 const dateCurrentPage: Ref<number> = ref(0)
@@ -80,10 +75,12 @@ const selectedDay: ComputedRef<number> = computed((): number => {
   return parseInt(selectedDate.day)
 })
 
-// Mounted hook
-onMounted(() => {
-  const dateCheck: boolean =
-    selectedDate.year != '' && selectedDate.month != '' && selectedDate.day != '' // Check initialized default date value
+const WeekDays: ComputedRef<WeekDayType[]> = computed(() => {
+  if (props.dateType == 'jalali') {
+    return weekDaysFromSat
+  } else {
+    return weekDays
+  }
 })
 
 // Methods
@@ -270,12 +267,6 @@ function dateInRangeChecker(day: string): boolean {
 
 <template>
   <main class="ak-border-3 ak-flex ak-flex-col ak-gap-0.5">
-    <div class="ak-mx-auto ak-flex ak-min-w-min ak-flex-row ak-gap-0.5">
-      <span class="ak-text-base ak-font-normal ak-text-[--main-color]">
-        {{ selectedDate.year }}
-        {{ translation[props.dateType].months[parseInt(selectedDate.month) - 1] }}
-      </span>
-    </div>
     <div>
       <div name="selectionBox" id="selectionBox">
         <div class="ak-min-h-60 h-full ak-w-full" name="years" id="selectionYear" v-if="step === 'year'">
@@ -325,7 +316,7 @@ function dateInRangeChecker(day: string): boolean {
             </tr>
           </table>
         </div>
-        <div class="ak-h-60 ak-w-full" name="months" v-else-if="step === 'month'">
+        <div v-else-if="step === 'month'" class="ak-h-60 ak-w-full" name="months">
           <div class="ak-flex ak-h-6"></div>
           <table class="ak-h-full ak-w-full">
             <tr v-for="season in 4" :key="`season-${season}`">
@@ -341,22 +332,22 @@ function dateInRangeChecker(day: string): boolean {
                 :key="`month-${month}`"
                 @click="setMonth(season, month)"
               >
-                {{ translation[dateType].months[(season - 1) * 3 + month - 1] }}
+                {{ props.messages[props.dateType].months[(season - 1) * 3 + month - 1] }}
               </td>
             </tr>
           </table>
         </div>
-        <div class="ak-h-full ak-w-full" name="days" v-else-if="step === 'date'">
+        <div v-else-if="step === 'date'" class="ak-h-full ak-w-full" name="days">
           <div class="ak-flex ak-h-6"></div>
           <table class="ak-h-full ak-w-full">
             <thead>
             <tr class="ak-h-3 ak-pb-1">
               <td
-                v-for="weekDay in translation[dateType].days"
+                v-for="weekDay in WeekDays"
                 :key="`weekDay-${weekDay}`"
                 class="ak-pb-1 ak-text-center ak-text-sm ak-font-light"
               >
-                {{ dateType == 'gregorian' ? weekDay.substring(0, 3) : weekDay[0] }}
+                {{ props.lang == 'fa' ? props.messages[dateType].days[weekDay][0] : weekDay.substring(0, 3) }}
               </td>
             </tr>
             </thead>

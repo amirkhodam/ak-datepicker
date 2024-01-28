@@ -37,7 +37,8 @@
     ".": {
       "import": "./dist/ak-datepicker.js",
       "require": "./dist/ak-datepicker.umd.cjs"
-    }
+    },
+    "./style.css": "./dist/style.css"
   },
   "scripts": {
     "dev": "vite",
