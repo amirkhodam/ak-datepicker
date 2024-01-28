@@ -4,8 +4,26 @@
   --primary-color: #005297;
   --select-trigger-bg-opacity: 0.2;
   --select-trigger-bg: rgb(75 85 99 / var(--select-trigger-bg-opacity));
-  --hover-color: #4b5563;
-  --in-range-date-bg: #0A273F
+  --trigger-caller-gap-datepicker: 0.5rem; // 8px
+  --main-rounded: 0.25rem; // 4px
+  --main-x-padding: 1.5rem; // 24px
+  --main-y-padding: 1.5625rem; // 25px
+  --trigger-x-padding: 2rem; // 32px
+  --trigger-y-padding: 0.5rem; // 16px
+  --trigger-font-size: 0.875rem; // 14px
+  --trigger-gap: 0.5rem; // 8px
+  --trigger-rounded: 0.5rem; // 4px
+  --trigger-btn-rounded: 0.25rem; // 8px
+  --trigger-active-text-color: white;
+  --trigger-inactive-text-color: #3A566D;
+  --calendar-hover-color: #005297;
+  --calendar-week-days-font-size: 0.75rem; // 12px
+  --calendar-is-range-date-bg: rgba(0, 82, 151, 0.8);
+  --calendar-in-range-date-bg: #0A273F;
+  --calendar-hover-year-radius: 99999px;
+  --calendar-hover-month-radius: 0.25rem;
+  --calendar-hover-date-radius: 99999px;
+  --calendar-is-range-radius: 1.375rem; // 22px
 }
 
 .ak_datepicker {
@@ -18,5 +36,5 @@
   font-feature-settings: normal;
   font-variation-settings: normal;
   -webkit-tap-highlight-color: transparent;
-@import "output";
+  @import "output";
 }

@@ -170,7 +170,7 @@ function closeDatePicker(datePickerIndex: number) {
 <template>
   <main
     class="ak-relative ak_datepicker ak-h-full ak-w-full">
-    <div v-if="dateConfig.withInput || dateConfig.withButton" class="ak-mb-1">
+    <div v-if="dateConfig.withInput || dateConfig.withButton" class="ak-mb-[--trigger-caller-gap-datepicker]">
       <div v-if="dateConfig.withInput" class="ak-relative ak-h-full ak-w-full">
         <input type="text" v-model="dateString" @focus="IsShowDate = true" />
       </div>
@@ -182,22 +182,18 @@ function closeDatePicker(datePickerIndex: number) {
     </div>
     <div
       v-if="IsShowDate"
-      class="ak-absolute ak-max-h-min ak-min-h-112 ak-min-w-6 ak-max-w-min ak-rounded-lg ak-bg-[var(--bg-main)] ak-p-6 ak-text-white"
+      class="ak-absolute ak-max-h-min ak-max-w-min ak-rounded-[--main-rounded] \
+             ak-bg-[var(--bg-main)] ak-px-[--main-x-padding] ak-py-[--main-y-padding] ak-text-white"
     >
       <template v-if="dateConfig.isConsecutiveMonth">
         <StepsTrig class="ak-w-1/2" v-model:step="stepFirst" :dateType="dateConfig.dateType" :messages="Messages" />
       </template>
-      <p class="ak-mx-auto ak-block ak-h-3 ak-max-w-max ak-font-semibold ak-text-[color:var(--main-color)]">
-        {{ dateFP.DateToString(dateConfig.dateType, dateConfig.format, selectedDateFirst) }}
-        {{ dateConfig.range ? ' _ ' : '' }}
-        {{ dateFP.DateToString(dateConfig.dateType, dateConfig.format, selectedDateSecond)
-        }}
-      </p>
       <br />
       <div class="ak-w-132 ak-flex ak-flex-row ak-gap-1">
         <div class="ak-w-full ak-flex ak-flex-col ak-items-center ak-justify-between ak-gap-6">
           <div v-if="!dateConfig.isConsecutiveMonth" class="ak-h-10">
-            <StepsTrig v-model:step="stepFirst" :dateType="dateConfig.dateType" :messages="Messages" />
+            <StepsTrig v-model:step="stepFirst" :dateType="dateConfig.dateType" :messages="Messages"
+            class="ak-mb-3"/>
           </div>
           <DatePickerSingle
             :class="{
@@ -221,7 +217,8 @@ function closeDatePicker(datePickerIndex: number) {
         <br />
         <div v-if="isNotConsecutive" class="ak-flex ak-flex-col ak-items-center ak-justify-between ak-gap-6">
           <div v-if="!dateConfig.isConsecutiveMonth" class="ak-h-10">
-            <StepsTrig v-model:step="stepSecond" :dateType="dateConfig.dateType" :messages="Messages" />
+            <StepsTrig v-model:step="stepSecond" :dateType="dateConfig.dateType" :messages="Messages"
+            class="ak-mb-3"/>
           </div>
           <DatePickerSingle
             class="ak-w-60"

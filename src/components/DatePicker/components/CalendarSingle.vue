@@ -305,7 +305,7 @@ function dateInRangeChecker(day: string): boolean {
               <td
                 :class="{
                 'ak-text-center': true,
-                 'ak-cursor-pointer hover:ak-bg-[--hover-color]' : getYear(duration, year) != ''
+                 'ak-cursor-pointer hover:ak-bg-[--calendar-hover-color] hover:ak-rounded-[--calendar-hover-year-radius]' : getYear(duration, year) != ''
               }"
                 v-for="year in 5"
                 :key="`year-${year}`"
@@ -317,14 +317,13 @@ function dateInRangeChecker(day: string): boolean {
           </table>
         </div>
         <div v-else-if="step === 'month'" class="ak-h-60 ak-w-full" name="months">
-          <div class="ak-flex ak-h-6"></div>
           <table class="ak-h-full ak-w-full">
             <tr v-for="season in 4" :key="`season-${season}`">
               <td
                 :class="{
                   'ak-text-center': true,
                   'ak-opacity-50': !monthInRangeChecker(((season - 1) * 3 + month).toString()),
-                  'ak-cursor-pointer hover:ak-bg-[--hover-color]': monthInRangeChecker(
+                  'ak-cursor-pointer hover:ak-bg-[--calendar-hover-color] hover:ak-rounded-[--calendar-hover-month-radius]': monthInRangeChecker(
                     ((season - 1) * 3 + month).toString()
                   )
                 }"
@@ -345,9 +344,11 @@ function dateInRangeChecker(day: string): boolean {
               <td
                 v-for="weekDay in WeekDays"
                 :key="`weekDay-${weekDay}`"
-                class="ak-pb-1 ak-text-center ak-text-sm ak-font-light"
+                class="ak-w-10 ak-pb-1 ak-text-center ak-text-sm ak-font-light"
+                style="font-size: var(--calendar-week-days-font-size)"
               >
-                {{ props.lang == 'fa' ? props.messages[dateType].days[weekDay][0] : weekDay.substring(0, 3) }}
+                {{ props.lang == 'fa' ? props.messages[dateType].days[weekDay][0] : weekDay.substring(0, 3).toUpperCase()
+                }}
               </td>
             </tr>
             </thead>
@@ -357,14 +358,21 @@ function dateInRangeChecker(day: string): boolean {
                 :key="`day-${day}`"
                 :class="{
                   'ak-text-center': true,
-                  'ak-flex-inline ak-h-8 ak-w-8 ak-items-center ak-justify-center': true,
-                  'ak-bg-[--primary-color]': selectedDay == parseInt(getDay(week, day)),
-                  'ak-translate ak-bg-[--in-range-date-bg] ak-bg-opacity-[0.7]': SelectedDateInRangeChecker(
+                  'ak-flex-inline ak-h-10 ak-w-10 ak-items-center ak-justify-center': true,
+                  'ak-bg-[--calendar-is-range-date-bg]': selectedDay == parseInt(getDay(week, day)),
+                  'ak-rounded-l-[--calendar-is-range-radius]': selectedDay == parseInt(getDay(week, day)) && isStartDatePicker,
+                  'ak-rounded-r-full': selectedDay == parseInt(getDay(week, day)) && !isStartDatePicker,
+                  'ak-translate ak-bg-[--calendar-in-range-date-bg] ak-bg-opacity-[0.7] hover:ak-rounded-none': SelectedDateInRangeChecker(
                     getDay(week, day)
                   ),
-                  'ak-cursor-pointer hover:ak-bg-[--hover-color]':
+                  'ak-cursor-pointer hover:ak-bg-[--calendar-hover-color]':
                     getDay(week, day) != '' && dateInRangeChecker(getDay(week, day).toString()),
-                  'ak-opacity-50': !dateInRangeChecker(getDay(week, day).toString())
+                  'ak-opacity-50': !dateInRangeChecker(getDay(week, day).toString()),
+                  'hover:ak-rounded-[--calendar-hover-date-radius]':
+                    getDay(week, day) != '' &&
+                    dateInRangeChecker(getDay(week, day).toString()) &&
+                    selectedDay != parseInt(getDay(week, day))&&
+                    !SelectedDateInRangeChecker(getDay(week, day)),
                 }"
                 @click="setDate(getDay(week, day).toString())"
               >
