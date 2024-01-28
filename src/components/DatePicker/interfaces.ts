@@ -219,7 +219,8 @@ export interface DatePickerInterface {
  *    format: string
  *    range: boolean
  *    lang: string[2]
- *    messages: LangInterface
+ *    messages: LangInterface,
+ *    relative: boolean
  *  }
  *  ```
  **/
@@ -234,6 +235,7 @@ export interface SinglePickerInterface {
   range: boolean
   lang: string[2]
   messages: LangInterface
+  relative: boolean
 }
 
 // Steps Props

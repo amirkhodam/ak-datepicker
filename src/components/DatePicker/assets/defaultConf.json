@@ -7,5 +7,6 @@
   "isConsecutiveMonth": true,
   "nextMonth": true,
   "withInput": true,
-  "withButton": false
+  "withButton": false,
+  "relative": true
 }
