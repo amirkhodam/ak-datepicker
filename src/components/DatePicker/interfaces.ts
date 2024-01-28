@@ -15,6 +15,8 @@ export type DateType = 'jalali' | 'gregorian'
  *    format: string
  *    isConsecutiveMonth: boolean
  *    nextMonth: boolean
+ *    withInput: boolean
+ *    withButton: boolean
  *  }
  *  ```
  **/
@@ -26,6 +28,8 @@ export interface ConfigInterface {
   format: string
   isConsecutiveMonth: boolean
   nextMonth: boolean
+  withInput: boolean
+  withButton: boolean
 }
 
 /**
@@ -158,6 +162,7 @@ export interface MessagesInterface {
 /**
  * ```json
  *  {
+ *    show?: any
  *    value: string
  *    config?: ConfigInterface
  *    lang: string[2]
@@ -166,6 +171,7 @@ export interface MessagesInterface {
  *  ```
  **/
 export interface DatePickerInterface {
+  show?: any // must check it be boolean (Vue init it false by default)
   value: string
   config?: ConfigInterface
   lang?: string[2]

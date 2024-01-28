@@ -5,5 +5,7 @@
   "range": true,
   "format": "yyyy-MM-dd",
   "isConsecutiveMonth": true,
-  "nextMonth": true
+  "nextMonth": true,
+  "withInput": true,
+  "withButton": false
 }

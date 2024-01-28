@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, nextTick, onMounted, ref, watch } from 'vue'
+import { computed, inject, nextTick, onMounted, ref, watch, WritableComputedRef } from 'vue'
 import type { Ref } from 'vue'
 import { CalendarSingle as DatePickerSingle } from './components/index'
 import DefaultConf from './assets/defaultConf.json'
@@ -15,7 +15,7 @@ import { messages } from '../localization/index'
 
 // Props from parent component
 const props = defineProps<DatePickerInterface>()
-const emit = defineEmits(['update:value'])
+const emit = defineEmits(['update:value', 'update:show'])
 
 // Injection
 const dateConfig = (inject('akDatepickerConf') || props.config || DefaultConf) as ConfigInterface
@@ -28,6 +28,23 @@ const stepFirst: Ref<StepType> = ref('year')
 const stepSecond: Ref<StepType> = ref('year')
 
 // Computed properties
+const IsShowDate: WritableComputedRef<boolean | Ref<boolean>> = computed({
+  set: (newValue) => {
+    if (typeof props.show === 'boolean') {
+      emit('update:show', newValue)
+    } else {
+      isShowDate.value = typeof newValue == 'boolean' ? newValue : newValue.value
+    }
+  },
+  get: () => {
+    if (typeof props.show === 'boolean') {
+      return props.show
+    } else {
+      return isShowDate.value
+    }
+  }
+})
+
 const StepSecond = computed(() => {
   return dateConfig.isConsecutiveMonth ? 'date' : 'year'
 })
@@ -133,17 +150,18 @@ watch(stepFirst, (newStep, oldStep) => {
     }
   }
 })
+
 // On mounted hook
 onMounted(() => {
-  isShowDate.value = false
+  IsShowDate.value = false
 })
 
 // Methods
 function closeDatePicker(datePickerIndex: number) {
   if (!dateConfig.range && dateString.value.length == 10) {
-    isShowDate.value = false
+    IsShowDate.value = false
   } else if (datePickerIndex == 1 && dateString.value.length == 21) {
-    isShowDate.value = false
+    IsShowDate.value = false
 
   }
 }
@@ -151,14 +169,19 @@ function closeDatePicker(datePickerIndex: number) {
 
 <template>
   <main
-    class="ak_datepicker ak-h-full ak-w-full">
-    <div class="ak-relative ak-h-full ak-w-full">
+    class="ak-relative ak_datepicker ak-h-full ak-w-full">
+    <div v-if="dateConfig.withInput || dateConfig.withButton" class="ak-mb-1">
+      <div v-if="dateConfig.withInput" class="ak-relative ak-h-full ak-w-full">
+        <input type="text" v-model="dateString" @focus="IsShowDate = true" />
+      </div>
+      <div v-else-if="dateConfig.withButton" class="ak-relative ak-h-full ak-w-full">
+        <button @click="IsShowDate = !IsShowDate">
+          <slot name="ak-button">btn</slot>
+        </button>
+      </div>
     </div>
-    <input type="text" v-model="dateString" @focus="isShowDate = true" />
-    <br />
-    <br />
     <div
-      v-if="isShowDate"
+      v-if="IsShowDate"
       class="ak-absolute ak-max-h-min ak-min-h-112 ak-min-w-6 ak-max-w-min ak-rounded-lg ak-bg-[var(--bg-main)] ak-p-6 ak-text-white"
     >
       <template v-if="dateConfig.isConsecutiveMonth">
