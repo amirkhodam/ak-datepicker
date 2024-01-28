@@ -173,7 +173,7 @@ function closeDatePicker(datePickerIndex: number) {
 
 <template>
   <main
-    class="ak-relative ak_datepicker ak-h-full ak-w-full">
+    :class="{'ak_datepicker ak-h-full ak-w-full': true, 'ak-relative': dateConfig.relative}">
     <div v-if="dateConfig.withInput || dateConfig.withButton" class="ak-mb-[--trigger-caller-gap-datepicker]">
       <div v-if="dateConfig.withInput" class="ak-relative ak-h-full ak-w-full">
         <input type="text" v-model="dateString" @focus="IsShowDate = true" />
@@ -186,8 +186,11 @@ function closeDatePicker(datePickerIndex: number) {
     </div>
     <div
       v-if="IsShowDate"
-      class="ak-absolute ak-max-h-min ak-max-w-min ak-rounded-[--main-rounded] \
-             ak-bg-[var(--bg-main)] ak-px-[--main-x-padding] ak-py-[--main-y-padding] ak-text-white"
+      :class="{
+        'ak-max-h-min ak-max-w-min ak-rounded-[--main-rounded] \
+             ak-bg-[var(--bg-main)] ak-px-[--main-x-padding] ak-py-[--main-y-padding] ak-text-white': true,
+        'ak-datepicker':dateConfig.relative
+      }"
     >
       <template v-if="dateConfig.isConsecutiveMonth">
         <StepsTrig class="ak-w-1/2" v-model:step="stepFirst" :dateType="dateConfig.dateType" :messages="Messages" />
