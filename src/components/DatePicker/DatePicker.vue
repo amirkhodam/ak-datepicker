@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import { computed, inject, nextTick, onMounted, ref, watch, WritableComputedRef } from 'vue'
+import { computed, ComputedRef, inject, nextTick, onMounted, ref, watch, WritableComputedRef } from 'vue'
 import type { Ref } from 'vue'
 import { CalendarSingle as DatePickerSingle } from './components/index'
 import DefaultConf from './assets/defaultConf.json'
-import type {
-  ConfigInterface, DateInterface,
+import {
+  ConfigInterface,
+  DateInterface,
   DatePickerInterface,
-  DateRangePickerInterface, MessagesInterface, StepType
+  DateRangePickerInterface,
+  LangInterface,
+  MessagesInterface,
+  StepType
 } from './interfaces'
 import { dateFP } from './utils/index'
 import StepsTrig from './components/StepsTrig.vue'
@@ -33,7 +37,7 @@ const IsShowDate: WritableComputedRef<boolean | Ref<boolean>> = computed({
     if (typeof props.show === 'boolean') {
       emit('update:show', newValue)
     } else {
-      isShowDate.value = typeof newValue == 'boolean' ? newValue : newValue.value
+      isShowDate.value = newValue
     }
   },
   get: () => {
@@ -126,7 +130,7 @@ const Lang = computed(() => {
   }
 })
 
-const Messages = computed(() => {
+const Messages: ComputedRef<LangInterface> = computed(() => {
   if (props.messages) {
     return props.messages[Lang.value]
   } else {
@@ -193,7 +197,7 @@ function closeDatePicker(datePickerIndex: number) {
         <div class="ak-w-full ak-flex ak-flex-col ak-items-center ak-justify-between ak-gap-6">
           <div v-if="!dateConfig.isConsecutiveMonth" class="ak-h-10">
             <StepsTrig v-model:step="stepFirst" :dateType="dateConfig.dateType" :messages="Messages"
-            class="ak-mb-3"/>
+                       class="ak-mb-3" />
           </div>
           <DatePickerSingle
             :class="{
@@ -218,7 +222,7 @@ function closeDatePicker(datePickerIndex: number) {
         <div v-if="isNotConsecutive" class="ak-flex ak-flex-col ak-items-center ak-justify-between ak-gap-6">
           <div v-if="!dateConfig.isConsecutiveMonth" class="ak-h-10">
             <StepsTrig v-model:step="stepSecond" :dateType="dateConfig.dateType" :messages="Messages"
-            class="ak-mb-3"/>
+                       class="ak-mb-3" />
           </div>
           <DatePickerSingle
             class="ak-w-60"

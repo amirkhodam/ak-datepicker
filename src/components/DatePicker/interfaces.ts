@@ -96,6 +96,67 @@ export interface YearInterface {
 
 
 /**
+ * Language (Translation) interface
+ * ```json
+ *  {
+ *     from: string
+ *     to: string
+ *     status: {
+ *       year: string
+ *       month: string
+ *       date: string
+ *     }
+ *     jalali: {
+ *       months: string[]
+ *       days: {
+ *         [day: string]: string
+ *       }
+ *     }
+ *     gregorian: {
+ *       months: string[]
+ *       days: {
+ *         [day: string]: string
+ *       }
+ *     }
+ *   }
+ *  ```
+ *  */
+export interface LangInterface {
+  from: string
+  to: string
+  status: {
+    year: string
+    month: string
+    date: string
+  }
+  jalali: {
+    months: string[]
+    days: {
+      sat: string
+      sun: string
+      mon: string
+      tue: string
+      wen: string
+      thu: string
+      fri: string
+    }
+  }
+  gregorian: {
+    months: string[]
+    days: {
+      sat: string
+      sun: string
+      mon: string
+      tue: string
+      wen: string
+      thu: string
+      fri: string
+    }
+  }
+
+}
+
+/**
  * Messages (Translation) interface
  * ```json
  *  {
@@ -124,39 +185,7 @@ export interface YearInterface {
  *  ```
  *  */
 export interface MessagesInterface {
-  [lang: string]: {
-    from: string
-    to: string
-    status: {
-      year: string
-      month: string
-      date: string
-    }
-    jalali: {
-      months: string[]
-      days: {
-        sat: string
-        sun: string
-        mon: string
-        tue: string
-        wen: string
-        thu: string
-        fri: string
-      }
-    }
-    gregorian: {
-      months: string[]
-      days: {
-        sat: string
-        sun: string
-        mon: string
-        tue: string
-        wen: string
-        thu: string
-        fri: string
-      }
-    }
-  }
+  [lang: string]: LangInterface
 }
 
 /**
@@ -190,7 +219,7 @@ export interface DatePickerInterface {
  *    format: string
  *    range: boolean
  *    lang: string[2]
- *    messages: MessagesInterface
+ *    messages: LangInterface
  *  }
  *  ```
  **/
@@ -204,7 +233,7 @@ export interface SinglePickerInterface {
   format: string
   range: boolean
   lang: string[2]
-  messages: MessagesInterface
+  messages: LangInterface
 }
 
 // Steps Props
@@ -213,14 +242,14 @@ export interface SinglePickerInterface {
  *  {
  *    step: Step
  *    dateType: DateType
- *    messages: MessagesInterface
+ *    messages: LangInterface
  *  }
  *  ```
  *  */
 export interface StepsPropsInterface {
   step: StepType
   dateType: DateType
-  messages: MessagesInterface
+  messages: LangInterface
 }
 
 // Week Days

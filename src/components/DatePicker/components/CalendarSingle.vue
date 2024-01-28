@@ -4,7 +4,8 @@ import { computed, reactive, ref } from 'vue'
 import type { Ref, ComputedRef, UnwrapNestedRefs } from 'vue'
 import {
   DateInterface,
-  SinglePickerInterface, WeekDayType,
+  SinglePickerInterface,
+  WeekDayType,
   YearInterface
 } from '../interfaces'
 import { dateFP } from '../utils/index'
